@@ -1,0 +1,475 @@
+---
+title: "prep-data-for-app"
+format: html
+editor: visual
+---
+
+## *loading*
+
+```{r}
+library(tidyverse)
+library(haven)
+library(arrow)
+library(tidycensus)
+library(dtplyr)
+library(sf)
+library(stringr)
+library(tigris)
+```
+
+## *cz labels*
+
+```{r}
+options(tigris_use_cache = TRUE)
+
+# --- Read CZ <-> county mapping (drop geometry) ---
+sff <- sf::read_sf("prep/CommutingZones2020_County_GIS_files/county20.shp") |>
+  st_drop_geometry() |>
+  as_tibble() |>
+  filter(!stringr::str_starts(as.character(GEOID), "02")) |> # gets rid of AK
+  transmute(
+    countycd = as.integer(GEOID),
+    CZ       = CZ20
+  )
+
+# --- Cities (≥ 1,000 pop), keep all (not only top per county) ---
+city_data <- read_csv("prep/us_cities_over_1000_with_county_fips.csv") |>
+  mutate(countycd = as.integer(county_fips)) |>
+  select(city, state_name, countycd, population)
+
+# --- State name -> postal abbreviation (add DC + territories as needed) ---
+state_map <- tibble::tibble(
+  state_name   = c(state.name, "District of Columbia", "Puerto Rico", "Guam",
+                   "American Samoa", "Northern Mariana Islands", "U.S. Virgin Islands"),
+  state_abbrev = c(state.abb,   "DC",                    "PR",         "GU",
+                   "AS",         "MP",                   "VI")
+)
+
+ratio_thresh <- 2
+share_thresh <- 0.8
+
+# --- Attach CZ and state abbrev to each city ---
+city_cz <- city_data |>
+  inner_join(sff, by = "countycd") |>
+  left_join(state_map, by = "state_name") |>
+  mutate(city_st = if_else(is.na(state_abbrev), city, paste0(city, ", ", state_abbrev)))
+
+# --- CITY-BASED label per CZ ---
+cz_labels_city <- city_cz |>
+  group_by(CZ) |>
+  summarise(
+    cz_label = {
+      df <- arrange(cur_data_all(), desc(population))
+      if (nrow(df) == 0) {
+        NA_character_
+      } else if (nrow(df) >= 2 && df$population[1] >= ratio_thresh * df$population[2]) {
+        df$city_st[1]
+      } else {
+        paste(df$city_st[df$population >= share_thresh * df$population[1]], collapse = " & ")
+      }
+    },
+    .groups = "drop"
+  )
+
+# --- Get county names from tigris ---
+county_names <- tigris::counties(year = 2020, cb = TRUE) |>
+  st_drop_geometry() |>
+  transmute(
+    countycd = as.integer(GEOID),
+    county   = as.character(NAME),
+    statefp  = as.integer(STATEFP)
+  )
+
+state_lu <- tigris::fips_codes |>
+  distinct(state_code, state) |>
+  transmute(statefp = as.integer(state_code), state_abbrev = state)
+
+county_names <- county_names |>
+  left_join(state_lu, by = "statefp") |>
+  mutate(
+    county_clean = str_remove(county, " County$"),
+    county_st    = if_else(!is.na(state_abbrev),
+                           paste0(county_clean, " Co., ", state_abbrev),
+                           county_clean)
+  ) |>
+  select(countycd, county_st)
+
+# --- COUNTY-NAME fallback (singular/plural prefix) ---
+cz_labels_fallback <- sff |>
+  left_join(county_names, by = "countycd") |>
+  group_by(CZ) |>
+  summarise(
+    counties_named = paste(sort(unique(county_st)), collapse = ", "),
+    n_cty = n_distinct(county_st),
+    .groups = "drop"
+  ) |>
+  mutate(
+    cz_label_fallback = if_else(
+      n_cty == 1,
+      paste0("County: ", counties_named),
+      paste0("Counties: ", counties_named)
+    )
+  ) |>
+  select(CZ, cz_label_fallback)
+
+# --- Combine: prefer city label; else county-name fallback; else "CZ <code>" ---
+cz_labels <- sff |> distinct(CZ) |>
+  left_join(cz_labels_city,     by = "CZ") |>
+  left_join(cz_labels_fallback, by = "CZ") |>
+  mutate(
+    cz_label = dplyr::coalesce(cz_label, cz_label_fallback, paste0("CZ ", CZ))
+  ) |>
+  select(CZ, cz_label)
+
+# --- Deduplicate if necessary ---
+cz_labels <- cz_labels |>
+  add_count(cz_label, name = "n_dup") |>
+  mutate(
+    cz_label = if_else(n_dup > 1, paste0(cz_label, " (CZ ", CZ, ")"), cz_label)
+  ) |>
+  select(-n_dup)
+
+# --- Attach labels back to counties and write ---
+county_cz_labels <- sff |>
+  select(countycd, CZ) |>
+  left_join(cz_labels, by = "CZ") |>
+  rename(county = countycd)
+
+write_csv(county_cz_labels, "county_cz_labels.csv")
+```
+
+## *supply*
+
+```{r}
+supply_data_tab <- read_dta("prep/ccrc_cip_comp_aire_6dig.dta")
+
+supply_data_tab %>%
+  distinct(unitid, instnm) %>%
+  count(unitid) %>% 
+  arrange(desc(n)) %>% 
+  filter(n > 1) # 128!
+
+# rename
+latest_by_unit <- supply_data_tab %>%
+  group_by(unitid) %>%
+  summarize(latest_year = max(year, na.rm = TRUE), .groups = "drop")
+
+latest_name <- supply_data_tab %>%
+  inner_join(latest_by_unit, by = "unitid") %>%
+  filter(year == latest_year) %>%
+  count(unitid, instnm, sort = TRUE) %>%
+  group_by(unitid) %>%
+  slice_max(order_by = n, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(unitid, instnm_latest = instnm)
+
+supply_data_tab <- supply_data_tab %>%
+  left_join(latest_name, by = "unitid") %>%
+  mutate(instnm = instnm_latest) %>%
+  select(-instnm_latest)
+
+supply_data_tab
+
+supply_data_tab %>%
+  distinct(unitid, instnm) %>%
+  count(unitid) %>% 
+  arrange(desc(n)) %>% 
+  filter(n > 1) # 0
+
+supply_data <- supply_data_tab %>% 
+  select(instnm, inst_id = unitid,
+         aire_ind,
+         year, 
+         state = State,
+         tribal,
+         rural,
+         cip,
+         ciptitle,
+         county = countycd,
+         award_level = awlevel,
+         total_completions = cmplt_tot,
+         airea_completions = aire_cmplt_tot,
+         total_students_enrolled = eftotlt1,
+         total_ft_students_enrolled = eftotlt21,
+         webaddr)
+
+supply_data <- supply_data %>% 
+  mutate(ciptitle = str_trim(ciptitle))
+
+supply_data <- supply_data %>%
+  mutate(county = as.integer(county)) %>% 
+  left_join(county_cz_labels)
+
+supply_data <- supply_data %>% 
+  select(-CZ, -county)
+
+supply_data %>%
+  mutate(year = as.integer(year)) %>%
+  write_dataset("prep/supply_partitioned",
+                format = "parquet",
+                partitioning = c("instnm"))
+
+supply_data %>% 
+  arrow::write_parquet("prep/supply.parquet.gzip", compression = "gzip")
+```
+
+## *map tab supply data prep*
+
+```{r}
+map_supply_data <- supply_data_tab %>% 
+  select(instnm, inst_id = unitid,
+         latitude, longitud,
+         year, 
+         state = State,
+         county = countycd,
+         total_completions = cmplt_tot,
+         airea_completions = aire_cmplt_tot)
+
+map_supply_data <- map_supply_data %>%
+  mutate(county = as.integer(county)) %>% 
+  left_join(county_cz_labels)
+
+map_supply_data <- map_supply_data %>% 
+  select(-CZ, -county)
+
+map_supply_summary <- map_supply_data %>%
+  group_by(year, inst_id, instnm) %>%   
+  summarise(
+    cz_label  = first(na.omit(cz_label)),
+    latitude  = first(na.omit(latitude)),
+    longitud  = first(na.omit(longitud)),
+    inst_cmplt_tot    = sum(total_completions, na.rm = TRUE),
+    airea_completions = sum(airea_completions, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    inst_perc_acea_tot = if_else(inst_cmplt_tot > 0,
+                                 airea_completions / inst_cmplt_tot,
+                                 NA_real_)
+  ) %>%
+  arrange(year, instnm)
+
+map_supply_summary %>% 
+  arrow::write_parquet("prep/mapsupply.parquet.gzip", compression = "gzip")
+
+mapsupply <- read_parquet("prep/mapsupply.parquet.gzip")
+
+## write mapsupply as rds
+saveRDS(mapsupply, "prep/mapsupply.rds")
+```
+
+## *demand data*
+
+```{r}
+demand_data <- read_csv("prep/lightcast-soc-year-county-2025-02-24 7_23pm.csv")
+
+# many are unknown
+demand_data <- demand_data %>% 
+  filter(!str_detect(COUNTY_NAME, "Unknown"))
+
+demand_data <- demand_data %>% 
+  rename(county = COUNTY)
+
+demand_data <- demand_data %>% 
+  left_join(county_cz_labels, by = "county") %>% 
+  select(-CZ)
+
+demand_meta_data <- read_dta("prep/full_soc.dta")
+
+demand_meta_data <- demand_meta_data %>%
+  mutate(aire_ind = as_factor(aire_ind)) %>%  # keep descriptive labels
+  mutate(value = 1) %>%                       # mark presence
+  pivot_wider(
+    names_from = aire_ind, 
+    values_from = value, 
+    values_fill = list(value = 0)
+  ) %>% 
+  janitor::clean_names() %>% 
+  rename(industry_non_airea = non_aire,
+         industry_energy = energy,
+         industry_infrastructure = infrastructure,
+         industry_ag_nat_resources = agriculture_natural_resources)
+
+demand_data <- demand_data %>% 
+  rename(soc = SOC_CODE) %>% 
+  left_join(demand_meta_data)
+
+# years <- 2010:2023
+# 
+# county_pop_data <- map_dfr(
+#  years,
+#  ~ get_acs(
+#    geography  = "county",
+#    variables  = "B01003_001",
+#    year       = .x,
+#     survey     = "acs5",
+#     cache_table= TRUE
+#   ) |>
+#     mutate(year = .x)
+# )
+
+# write_rds(county_pop_data, "county-pop-data.rds")
+
+county_pop_data <- read_rds("county-pop-data.rds")
+
+county_pop_ts <- county_pop_data %>% 
+  select(-moe) %>% 
+  select(COUNTY = GEOID, population_estimate = estimate, YEAR = year) %>% 
+  rename(county = COUNTY) %>% 
+  mutate(county = as.integer(county))
+
+demand_data <- demand_data %>%
+  left_join(county_pop_ts, by = c("county", "YEAR"))
+
+demand_data <- demand_data %>% 
+  select(county,
+         cz_label,
+         year = YEAR, 
+         soc,
+         soc_title = soc2018title, 
+         job_posting_count = JOB_POSTING_COUNT,
+         ed_req,
+         airea = aire_relevant,
+         population_estimate,
+         contains("industry")
+  )
+
+demand_summed_by_cz <- lazy_dt(demand_data) %>%
+  group_by(cz_label, year, soc) %>%
+  summarise(
+    mean_population    = mean(population_estimate, na.rm = TRUE),
+    total_job_postings = sum(job_posting_count,   na.rm = TRUE),
+    
+    # grab first value of each “constant” column
+    soc_title                = first(soc_title),
+    ed_req                   = first(ed_req),
+    airea                    = first(airea),
+    across(starts_with("industry_"), first),
+    
+    .groups = "drop"
+  ) %>%
+  as_tibble() %>% 
+  filter(!is.na(cz_label))
+
+demand_summed_by_cz <- demand_summed_by_cz %>%
+  mutate(airea = ifelse(is.na(airea), 0, airea))
+
+demand_summed_by_cz  %>%
+  write_dataset("prep/demand_partitioned",
+                format = "parquet",
+                partitioning = c("cz_label"))
+
+demand_summed_by_cz %>% 
+  arrow::write_parquet("prep/demand.parquet.gzip", compression = "gzip")
+```
+
+## *map demand data prep*
+
+```{r}
+# End-to-end pipeline: demand_summed_by_cz → CZ-year metrics → align CZ20 & geometry → per-year GeoJSON
+# ─────────────────────────────────────────────────────────────────────────────
+# 0) Inputs expected in memory:
+#   - demand_summed_by_cz           : tibble with SOC-level postings by cz_label & year (<=2025)
+#   - county_cz_labels     : tibble/sf with at least: county (int FIPS), CZ (int), cz_label (chr)
+#   - county_pop_ts        : tibble with at least: GEOID (chr FIPS), year (int), estimate (num)
+#   - cz20                 : sf multipolygon with column CZ20 (int) + geometry
+# Output:
+#   - GeoJSON files: CZData_<year>.json (2010–2023)
+#     fields: CZ20, YEAR, total_postings, airea_job_posting, pop, pct_green, per1000, geometry
+# ─────────────────────────────────────────────────────────────────────────────
+
+# 1) Standardize county↔CZ mapping (drop geometry; unify key names/types)
+county_cz_labels_std <- county_cz_labels %>%
+  st_drop_geometry() %>%
+  transmute(
+    county   = as.integer(county),
+    CZ20     = as.integer(CZ),        # rename CZ → CZ20
+    cz_label = as.character(cz_label)
+  )
+
+# 2) Standardize county-year population (convert FIPS "01001" → 1001 as integer)
+county_pop_ts_std <- county_pop_ts %>%
+  transmute(
+    county = as.integer(GEOID),
+    year   = year,
+    population_estimate = estimate
+  )
+
+# 3) Population denominator for per1000:
+#    compute total population by CZ20 + year; keep only years <= 2023
+cz_pop_cz20_year <- county_pop_ts_std %>%
+  left_join(county_cz_labels_std %>% select(county, CZ20), by = "county") %>%
+  filter(!is.na(CZ20)) %>%
+  group_by(CZ20, year) %>%
+  summarise(cz_population = sum(population_estimate, na.rm = TRUE), .groups = "drop") %>%
+  filter(year <= 2023)
+
+# 4) Build a unique mapping cz_label → CZ20:
+#    For each label, pick the CZ20 with the largest cumulative population (2010–2023)
+cz_pop_by_cz20 <- county_pop_ts_std %>%
+  left_join(county_cz_labels_std, by = "county") %>%
+  filter(!is.na(CZ20), year <= 2023) %>%
+  group_by(CZ20, cz_label, year) %>%
+  summarise(cz_population = sum(population_estimate, na.rm = TRUE), .groups = "drop")
+
+cz_label_to_cz20_unique <- cz_pop_by_cz20 %>%
+  group_by(CZ20, cz_label) %>%
+  summarise(pop_total = sum(cz_population, na.rm = TRUE), .groups = "drop") %>%
+  filter(!is.na(cz_label)) %>%
+  group_by(cz_label) %>%
+  slice_max(order_by = pop_total, n = 1, with_ties = FALSE) %>%
+  ungroup() %>%
+  select(cz_label, CZ20)
+
+# 5) Aggregate postings to CZ-year from demand_summed_by_cz (exclude 2024–2025)
+cz_year <- demand_summed_by_cz %>%
+  filter(year <= 2023) %>%
+  group_by(cz_label, year) %>%
+  summarise(
+    total_postings    = sum(total_job_postings, na.rm = TRUE),
+    airea_job_posting = sum(total_job_postings[airea == 1], na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 6) Bring in CZ20, then join population by CZ20+year; compute metrics
+cz_year_fixed <- cz_year %>%
+  left_join(cz_label_to_cz20_unique, by = "cz_label") %>%
+  filter(!is.na(CZ20)) %>%
+  select(-dplyr::any_of("pop")) %>%                                  # avoid name conflicts
+  left_join(cz_pop_cz20_year, by = c("CZ20", "year")) %>%
+  mutate(
+    pct_green = if_else(total_postings > 0,
+                        100 * airea_job_posting / total_postings, NA_real_),  # percentage (0–100)
+    per1000   = if_else(cz_population   > 0,
+                        1000 * total_postings / cz_population,    NA_real_)   # jobs per 1,000
+  ) %>%
+  rename(pop = cz_population)
+
+# (Optional) Quick QA
+# stopifnot(!any(duplicated(cz_year_fixed[, c("CZ20", "year")])))
+# summary(cz_year_fixed$pct_green); summary(cz_year_fixed$per1000)
+
+# 7) Join geometry and export one GeoJSON per year (what the front-end expects)
+cz20_clean <- cz20 %>%
+  st_transform(4326) %>%
+  st_make_valid() %>%
+  st_zm(drop = TRUE, what = "ZM")
+
+cz_sf_new <- cz20_clean %>%
+  select(CZ20, geometry) %>%
+  inner_join(cz_year_fixed, by = "CZ20") %>%
+  rename(YEAR = year) %>%
+  select(CZ20, YEAR,
+         total_postings, airea_job_posting, pop, pct_green, per1000,
+         geometry)
+
+years <- sort(unique(cz_sf_new$YEAR))
+for (y in years) {
+  st_write(
+    cz_sf_new %>% filter(YEAR == y),
+    paste0("CZData_", y, ".json"),
+    driver = "GeoJSON",
+    delete_dsn = TRUE
+  )
+}
+```
