@@ -308,7 +308,7 @@ function loadInstituteDataForYear(year) {
 
           const html = `
             <strong>${props.instnm}</strong><br>
-            Comuting Zone: ${props.CZ_label}<br>
+            Comuting Zone: ${props.cz_label}<br>
             AIREA Degree: ${(+props.inst_green_cmplt_tot).toLocaleString()}<br>
             Total Degree: ${(+props.inst_cmplt_tot).toLocaleString()}<br>
             % AIREA Degrees: ${(props.inst_perc_green_tot*100).toFixed(1)}%
