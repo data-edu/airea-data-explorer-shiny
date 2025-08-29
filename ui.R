@@ -103,7 +103,7 @@ navbarPage(
              tags$ul(
                style = "margin-bottom: 0;",
                tags$li(tags$strong("Map Tab"), "— Use the controls on the map to change year and color metric, or search for a specific institution. You can click and drag to reposition the input box anywhere on the map."),
-               tags$li(tags$strong("Degree Completions Tab"), "— Click on an institution in the table to see its AIREA completion trends and top programs."),
+               tags$li(tags$strong("Credentials Awarded Tab"), "— Click on an institution in the table to see its AIREA completion trends and top programs."),
                tags$li(tags$strong("Job Postings Tab"), "— Click on a commuting zone in the table to see its AIREA job posting trends and top occupations.")
              ),
              tags$hr()
@@ -160,10 +160,10 @@ navbarPage(
   
   
   # ============================================================================
-  # Panel 2: Degree Completions
+  # Panel 2: Credentials Awarded
   # ============================================================================
   
-  tabPanel("Degree Completions", value = "treemap",
+  tabPanel("Credentials Awarded", value = "treemap",
            
            tags$h2("Institutions by Mean Completions (All Years)"),
            
@@ -356,10 +356,10 @@ navbarPage(
   ),
   
   # ============================================================================
-  # Panel 4: About
+  # Panel 4: About the Data Explorer
   # ============================================================================
   
-  tabPanel("About", value = "about",
+  tabPanel("About the Data Explorer", value = "about",
            fluidRow(
              column(12,
                     tags$div(
@@ -390,14 +390,14 @@ navbarPage(
                       tags$p("Download the complete list of AIREA occupations and corresponding programs of study here."),
                       tags$br(),
                       tags$h3("Data Sources"),
-                      tags$h4("AIREA Degree Completions"),
-                      tags$p("For AIREA degree completions, we used the U.S. Department of Education's Integrated Postsecondary Education Data System (IPEDS). Specifically, we drew from IPEDS degree completions and institutional directory files covering the years 2010-2023. These data provide the foundation for tracking how many AIREA-related credentials community colleges have awarded over time, and where those programs are located."),
+                      tags$h4("AIREA Credentials Awarded"),
+                      tags$p("For AIREA credentials awarded, we used the U.S. Department of Education's Integrated Postsecondary Education Data System (IPEDS). Specifically, we drew from IPEDS credentials awarded and institutional directory files covering the years 2010-2023. These data provide the foundation for tracking how many AIREA-related credentials community colleges have awarded over time, and where those programs are located."),
                       tags$br(),
                       tags$h4("AIREA Job Postings"),
                       tags$p("For AIREA jobs, we used job postings data from Lightcast, the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every BLS SOC code, with geographic detail down to the county level. This granularity allowed us to aggregate postings data to commuting zones, ensuring comparability with the geographic structure used in IPEDS. Like IPEDS, the Lightcast data include detailed geographic identifiers, which enabled us to directly map both degree completion and labor market demand into the same commuting zone framework."),
                       tags$br(),
                       tags$h3("What is a commuting zone?"),
-                      tags$p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both degree completions (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
+                      tags$p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both credentials awarded (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
                     )
              )
            )
