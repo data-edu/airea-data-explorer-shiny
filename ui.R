@@ -61,16 +61,28 @@ navbarPage(
     tags$div(
       class = "app-footer",
       tags$hr(),
-      tags$p("Created by Wei Wang, Joshua Rosenberg, Cameron Sublet and Bret Staudt Willet,",
-             "in partnership with the",
-             tags$a(href="https://ccrc.tc.columbia.edu/", 
-                    "Community College Research Center"),
-             "at Teachers College, Columbia University.",
-             "Source code available on ",
-             tags$a(href="https://github.com/data-edu/CCRC_GreenSeek-Mapping",
-                    "GitHub."),
-             "Thanks to JPMorgan Chase for their financial support."
-      )
+      tags$p(
+        tags$b("Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer: "),
+        "The AIREA Data Explorer was created by Wei Wang, Joshua Rosenberg, ",
+        "Cameron Sublett, Matias Fresard, and Bret Staudt Willet, in partnership ",
+        "with the ",
+        tags$a(href="https://ccrc.tc.columbia.edu/", "Community College Research Center"),
+        "at Teachers College, Columbia University. Source code available on ",
+        tags$a(href="https://github.com/data-edu/airea-data-explorer", "GitHub"),
+        ". Funding for this project was provided by JPMorganChase and ",
+        "the National Renewable Energy Lab.",
+        
+        tags$br(),
+        tags$br(),
+        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-ccrc.png", alt = "CCRC logo"),
+        HTML("&emsp;"),
+        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-utk.jpg", alt = "CCRC logo"),
+        HTML("&emsp;"),
+        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo"),
+      ),
+      
+      tags$hr(),
+      tags$p(tags$b(paste("\u00A9", format(Sys.Date(), "%Y"))), "by CCRC")
     ),
   
   
