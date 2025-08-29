@@ -39,7 +39,7 @@ navbarPage(
   
   title = 
     tags$div(
-      tags$h1(img(src = "logo-airea.png", height = "36px"),
+      tags$h1(img(src = "logo-airea.png", height = "48px"),
               "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer")
     ),
   
@@ -68,7 +68,7 @@ navbarPage(
         "with the ",
         tags$a(href="https://ccrc.tc.columbia.edu/", "Community College Research Center"),
         "at Teachers College, Columbia University. Source code available on ",
-        tags$a(href="https://github.com/data-edu/airea-data-explorer", "GitHub"),
+        tags$a(href="https://github.com/data-edu/airea-data-explorer-shiny", "GitHub"),
         ". Funding for this project was provided by JPMorganChase and ",
         "the National Renewable Energy Lab.",
         
@@ -165,23 +165,30 @@ navbarPage(
   
   tabPanel("Credentials Awarded", value = "treemap",
            
-           tags$h2("Institutions by Mean Completions (All Years)"),
+           h2("Institutions by Mean Completions (All Years)"),
            
            # Top Row: Centered search for institution
            fluidRow(
              column(12,
-                    tags$div(
+                    div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align:center;",
+                      h4(
+                        icon("hand-point-up"),
+                        "Select an institution to see its AIREA completion trends over time:"
+                      ),
+                      br(),
                       div(
-                        style = "background-color:#ffffff; border:2px solid #4CAF50; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                         selectizeInput(
                           inputId = "supply_search",
-                          label   = tags$span("Search Institution", style = "font-size:1.25em; font-weight:700; color:#1a5276;"),
+                          label   = tags$span("Search Institution", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                           choices = NULL,
                           options = list(placeholder = 'Search institution...', create = FALSE),
                           width   = "100%"   # fills the 80% container
                         )
                       ),
+                      
+                      br(),
                       div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end; margin-top:10px;",
                         selectInput(
                           inputId = "supply_leader_airea",
@@ -196,52 +203,55 @@ navbarPage(
                           width = "30%"
                         )
                       )
+                      
                     )
              )
            ),
            
-           tags$hr(),
+           hr(),
            
            # Second Row: Time series plot (full width)
            fluidRow(
              column(12,
-                    tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      tags$h4(
-                        icon("hand-point-up"),
-                        "Click on an institution above to see its AIREA completion trends over time")),
-                    radioButtons(
-                      inputId = "supply_metric",
-                      label = NULL,
-                      choices = c("AIREA Completions" = "airea", "AIREA Percentage" = "pct"),
-                      selected = "airea",
-                      inline = TRUE
+                    br(),
+                    div(
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      radioButtons(
+                        inputId = "supply_metric",
+                        label = "Select:",
+                        choices = c("AIREA Completions" = "airea", "AIREA Percentage" = "pct"),
+                        selected = "airea",
+                        inline = TRUE
+                      )
                     ),
-                    plotOutput("supply_degrees_by_institution", height = "400px")
+                    br(),
+                    plotOutput("supply_degrees_by_institution", height = "400px"),
+                    br()
              )
            ),
            
-           tags$hr(),
+           hr(),
            
            # Third Row: CIP by Award Level (Stacked Bar)
            fluidRow(
              column(12,
-                    tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      tags$h4(
-                        icon("hand-point-up"),
-                        "Click on an institution above to see its AIREA completions by CIP. Use the toggle to switch between total counts and shares by award level (most recent year)")),
-                    radioButtons(
-                      inputId = "supply_bar_style",
-                      label = NULL,
-                      choices = c(
-                        "Filled" = "filled",
-                        "Stacked" = "single"
-                      ),
-                      selected = "filled",
-                      inline = TRUE
+                    br(),
+                    div(
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      radioButtons(
+                        inputId = "supply_bar_style",
+                        label = "Select:",
+                        choices = c(
+                          "Filled" = "filled",
+                          "Stacked" = "single"
+                        ),
+                        selected = "filled",
+                        inline = TRUE
+                      )
                     ),
-                    plotOutput("supply_cip_award_bar", height = "500px")
+                    br(),
+                    plotOutput("supply_cip_award_bar", height = "500px"),
+                    br()
              )
            )
   ),
@@ -256,23 +266,32 @@ navbarPage(
   
   tabPanel("Job Postings", value = "demand",
            
-           tags$h2("Commuting Zones by AIREA Job Posting Percentage (All Years)"),
+           h2("Commuting Zones by AIREA Job Posting Percentage (All Years)"),
            
            # Top Row: Centered search for commuting zone
            fluidRow(
              column(12,
-                    tags$div(
+                    div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align:center;",
+                      h4(
+                        icon("hand-point-up"),
+                        "Select a commuting zone to see the top occupations by AIREA job postings.", br(),
+                        "Use the controls to adjust the number of occupations and switch between total bars and shares by education requirement (most recent year)."
+                      ),
+                      
+                      br(),
                       div(
-                        style = "background-color:#ffffff; border:2px solid #4CAF50; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                         selectizeInput(
                           inputId = "cz_search",
-                          label   = tags$span("Search Commuting Zone", style = "font-size:1.25em; font-weight:700; color:#1a5276;"),
+                          label   = tags$span("Search Commuting Zone", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                           choices = NULL,
                           options = list(placeholder = 'Search Commuting Zone...', create = FALSE),
                           width   = "100%"   # fills the 80% container
                         )
                       ),
+                      
+                      br(),
                         div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end;",
                           selectInput(
                             inputId = "cz_leader_posts",
@@ -293,67 +312,79 @@ navbarPage(
                             width = "25%"
                           )
                         )
+                      
                     )
              )
            ),
            
-           tags$hr(),
+           hr(),
            
            # Second Row: Time series plot (full width)
            fluidRow(
              column(12,
-                    tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      tags$h4(
-                        icon("hand-point-up"),
-                        "Click on a Commuting Zone above to see its AIREA job posting percentage over time")),
-                    radioButtons(
-                      inputId = "demand_metric",
-                      label = NULL,
-                      choices = c(
-                        "AIREA job posts" = "airea",
-                        "AIREA % of all posts" = "pct",
-                        "AIREA posts per 100,000" = "per100k"
-                      ),
-                      selected = "airea",
-                      inline = TRUE
+                    br(),
+                    div(
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      radioButtons(
+                        inputId = "demand_metric",
+                        label = NULL,
+                        choices = c(
+                          "AIREA job posts" = "airea",
+                          "AIREA % of all posts" = "pct",
+                          "AIREA posts per 100,000" = "per100k"
+                        ),
+                        selected = "airea",
+                        inline = TRUE
+                      )
                     ),
-                    plotOutput("demand_cz_trend", height = "400px")
+                    
+                    br(),
+                    plotOutput("demand_cz_trend", height = "400px"),
+                    br()
              )
            ),
            
            tags$hr(),
            
+           
            # Third Row: Occupations by education requirement (Stacked Bar)
            fluidRow(
              column(12,
-                    tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                    tags$h4(
-                      icon("hand-point-up"),
-                      "Click on a Commuting Zone above to see the top occupations by AIREA job postings. Use the controls to adjust the number of occupations and switch between total bars and shares by education requirement (most recent year)")),
-                    numericInput(
-                      inputId = "num_socs",
-                      label = "Number of occupations (1–40) to display",
-                      value = 10,
-                      min = 1,
-                      max = 40,
-                      step = 1
-                    ),
-                    radioButtons(
-                      inputId = "demand_bar_style",
-                      label = NULL,
-                      choices = c(
-                        "Filled" = "filled",
-                        "Stacked" = "single"
+                    br(),
+                    div(
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      numericInput(
+                        inputId = "num_socs",
+                        label = "Number of occupations (1–40) to display:",
+                        value = 10,
+                        min = 1,
+                        max = 40,
+                        step = 1,
+                        width = "60%"
                       ),
-                      selected = "single",
-                      inline = TRUE
+                      br(),
+                      radioButtons(
+                        inputId = "demand_bar_style",
+                        label = NULL,
+                        choices = c(
+                          "Filled" = "filled",
+                          "Stacked" = "single"
+                        ),
+                        selected = "single",
+                        inline = TRUE
+                      )
                     ),
-                    plotOutput("demand_soc_edreq_bar", height = "500px")
+                    
+                    br(),
+                    plotOutput("demand_soc_edreq_bar", height = "500px"),
+                    br()
              )
            )
   ),
+  
+  
+  
+  
   
   # ============================================================================
   # Panel 4: About the Data Explorer
