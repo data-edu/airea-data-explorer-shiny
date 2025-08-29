@@ -78,6 +78,10 @@ onStop(function() {
 # Tab 3 table source (CSV summary for CZs)
 cz_table_df <- read_csv("data/cz-summary-table.csv")
 
+
+
+
+
 # ==============================================================================
 # App color palette and plot theme (match CSS)
 # ==============================================================================
@@ -104,15 +108,25 @@ ccrc_palette <- c(
   ccrc_colors$green_dark
 )
 
-ccrc_theme <- theme_minimal(base_size = 13) +
+ccrc_theme <- 
+  theme_minimal(base_size = 13) +
   theme(
     text = element_text(color = ccrc_colors$gray),
-    plot.title = element_text(color = ccrc_colors$purple, face = "bold"),
-    axis.title = element_text(color = ccrc_colors$gray),
+    plot.title = 
+      element_text(
+        color = ccrc_colors$purple, 
+        face = "bold",
+        size = 24,
+        hjust = 0),
+    axis.title = element_text(color = ccrc_colors$gray, face = "bold"),
     axis.text = element_text(color = ccrc_colors$gray),
     panel.grid.minor = element_blank(),
     panel.grid.major = element_line(color = "#e8f5e8")
   )
+
+
+
+
 
 # ==============================================================================
 # Server Logic
@@ -373,7 +387,8 @@ server <- function(input, output, session) {
       transmute(year,
                 nat_value = if (metric == "pct") pct_airea_completions * 100 else mean_airea_completions)
     
-    p <- ggplot(plot_df, aes(x = year, y = .data[[y_col]])) +
+    p <- 
+      ggplot(plot_df, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$teal) +
       geom_point(size = 2.5, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),
@@ -438,6 +453,8 @@ server <- function(input, output, session) {
         geom_col(position = "fill") +
         coord_flip() +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         labs(
           title = paste("AIREA completions by CIP and award level —", my_inst$instnm),
           y = "Share of AIREA Completions",
@@ -447,8 +464,8 @@ server <- function(input, output, session) {
         scale_fill_manual(values = ccrc_palette) +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         )
     } else {
@@ -458,18 +475,19 @@ server <- function(input, output, session) {
         geom_col(position = "stack") +
         coord_flip() +
         ccrc_theme +
-        scale_y_continuous(labels = scales::comma) +
+        scale_x_discrete(position = "top") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
           title = paste("AIREA completions by CIP —", my_inst$instnm),
-          y = "AIREA Completions",
+          y = "Number of AIREA Completions",
           x = NULL,
           fill = "Award level"
         ) +
         scale_fill_manual(values = ccrc_palette) +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         )
     }
@@ -868,10 +886,12 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         ) +
         scale_fill_manual(values = ccrc_palette) +
@@ -888,10 +908,12 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         ) +
         scale_fill_manual(values = ccrc_palette) +
