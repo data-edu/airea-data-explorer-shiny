@@ -233,6 +233,24 @@ label > input[type='radio']:checked + *::before {
 
 
 
+/* change text on info button */
+[id*=info] {
+  background-color: #0065a4 !important;
+  color: #fff !important;
+  font-family: 'Lato', sans-serif;
+  font-size: 8px;
+  margin-left: -2px; 
+  margin-right: 12px; 
+  margin-top: -4px;
+  vertical-align: top;
+  border: none !important;           /* Remove default button border */
+  border-radius: 50% !important;     /* Make it circular */
+  width: 16px !important;            /* Fixed width for consistency */
+  height: 16px !important;           /* Fixed height for consistency */
+  padding: 0 !important;             /* Remove default padding */
+}
+
+
 
 
 
@@ -245,7 +263,7 @@ label > input[type='radio']:checked + *::before {
   background-color: #f2f8f2;  /* light green */
   font-size: 12px;
   width: 100%;
-  padding: 20px 0;
+  padding: 10px 0;
 }
 
 

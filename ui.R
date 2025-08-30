@@ -5,6 +5,7 @@
 library(shiny)                 # Shiny framework for interactive web applications
 library(plotly)                # For interactive plotting
 source("mapboxtoken_setup.R")  # Loads Mapbox_token used for Mapbox access
+library(shinyBS)               # For interactive info buttons
 
 
 
@@ -14,7 +15,9 @@ source("mapboxtoken_setup.R")  # Loads Mapbox_token used for Mapbox access
 
 navbarPage(
   id = "tabs",
+
   
+    
   # ============================================================================
   # CSS for styling
   # ============================================================================
@@ -33,15 +36,20 @@ navbarPage(
   
   
   
+  
+  
   # ============================================================================
   # Title
   # ============================================================================
   
   title = 
-    tags$div(
-      tags$h1(img(src = "logo-airea.png", height = "48px"),
-              "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer")
+    div(
+      h1(img(src = "logo-airea.png", height = "60px"),
+         br(),
+         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer")
     ),
+  
+  
   
   
   
@@ -49,7 +57,62 @@ navbarPage(
   # Header: Navigation Bar
   # ============================================================================
 
-  header = NULL,
+  header = 
+    div(
+      class = "app-header",
+      p(tags$em("These interactive maps and data visualizations are for exploring how community college green program completions align with AIREA-sector job postings by commuting zone.")),
+      hr(),
+         
+
+            
+      ### Write out the text that appears when hovering over the info buttons
+      bsPopover(
+        id = "map_info",
+        title = "More Information",
+        content = HTML(paste0(
+          "Explore the number and share of AIREA job postings by year in each of the nation’s commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
+        )),
+        placement = "right",
+        trigger = "hover",
+        options = list(container = "body")
+      ),
+      
+      bsPopover(
+        id = "credentials_info",
+        title = "More Information",
+        content = HTML(paste0(
+          "See a list of the community colleges that award the most credentials in AIREA fields. Select an individual college for more detail on the types of AIREA credentials by award level and trends over time."
+        )),
+        placement = "right",
+        trigger = "hover",
+        options = list(container = "body")
+      ),
+      
+      bsPopover(
+        id = "jobs_info",
+        title = "More Information",
+        content = HTML(paste0(
+          "Find the commuting zones with the most AIREA job postings. Select an individual commuting zone for more detail on the top AIREA occupations and trends over time."
+        )),
+        placement = "right",
+        trigger = "hover",
+        options = list(container = "body")
+      ),
+      
+      bsPopover(
+        id = "about_info",
+        title = "More Information",
+        content = HTML(paste0(
+          "Learn more about what jobs and credentials are included in the AIREA Data Explorer and as well as the data sources for this analysis."
+        )),
+        placement = "right",
+        trigger = "hover",
+        options = list(container = "body")
+      )
+      
+    ),
+    
+  
   
   
     
@@ -58,10 +121,10 @@ navbarPage(
   # ============================================================================
   
   footer = 
-    tags$div(
+    div(
       class = "app-footer",
-      tags$hr(),
-      tags$p(
+      hr(),
+      p(
         tags$b("Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer: "),
         "The AIREA Data Explorer was created by Wei Wang, Joshua Rosenberg, ",
         "Cameron Sublett, Matias Fresard, and Bret Staudt Willet, in partnership ",
@@ -72,8 +135,8 @@ navbarPage(
         ". Funding for this project was provided by JPMorganChase and ",
         "the National Renewable Energy Lab.",
         
-        tags$br(),
-        tags$br(),
+        br(),
+        br(),
         tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-ccrc.png", alt = "CCRC logo"),
         HTML("&emsp;"),
         tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-utk.jpg", alt = "CCRC logo"),
@@ -81,8 +144,8 @@ navbarPage(
         tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo"),
       ),
       
-      tags$hr(),
-      tags$p(tags$b(paste("\u00A9", format(Sys.Date(), "%Y"))), "by CCRC")
+      hr(),
+      p(tags$b(paste("\u00A9", format(Sys.Date(), "%Y"))), "by CCRC")
     ),
   
   
@@ -93,21 +156,18 @@ navbarPage(
   # Panel 1: Map
   # ============================================================================
   
-  tabPanel("Map", value = "mainmap",
-           
-           tags$div(
-             style = "background-color: #f2f8f2; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-             tags$h4("These interactive maps and data visualizations are for exploring how community college green program completions align with AIREA-sector job postings by commuting zone."),
-             tags$hr(),
-             tags$h3("How to use the AIREA Data Explorer:"),
-             tags$ul(
-               style = "margin-bottom: 0;",
-               tags$li(tags$strong("Map Tab"), "— Use the controls on the map to change year and color metric, or search for a specific institution. You can click and drag to reposition the input box anywhere on the map."),
-               tags$li(tags$strong("Credentials Awarded Tab"), "— Click on an institution in the table to see its AIREA completion trends and top programs."),
-               tags$li(tags$strong("Job Postings Tab"), "— Click on a commuting zone in the table to see its AIREA job posting trends and top occupations.")
+  tabPanel(title = 
+             div(
+               "Map",
+               bsButton("map_info", 
+                        label = "", 
+                        icon = icon("info", 
+                                    lib = "font-awesome"), 
+                        size = "extra-small"
+               )
              ),
-             tags$hr()
-           ),
+           value = "mainmap",
+           
            
            # Map container
            fluidRow(
@@ -163,7 +223,17 @@ navbarPage(
   # Panel 2: Credentials Awarded
   # ============================================================================
   
-  tabPanel("Credentials Awarded", value = "treemap",
+  tabPanel(title =
+             div(
+               "Credentials Awarded", 
+               bsButton("credentials_info", 
+                        label = "", 
+                        icon = icon("info", 
+                                    lib = "font-awesome"), 
+                        size = "extra-small"
+               )
+             ),
+           value = "treemap",
            
            h2("Institutions by Mean Completions (All Years)"),
            
@@ -264,7 +334,17 @@ navbarPage(
   # Panel 3: Job Postings
   # ============================================================================
   
-  tabPanel("Job Postings", value = "demand",
+  tabPanel(title = 
+             div(
+               "Job Postings", 
+               bsButton("jobs_info", 
+                        label = "", 
+                        icon = icon("info", 
+                                    lib = "font-awesome"), 
+                        size = "extra-small"
+               )
+             ),
+           value = "demand", 
            
            h2("Commuting Zones by AIREA Job Posting Percentage (All Years)"),
            
@@ -390,7 +470,18 @@ navbarPage(
   # Panel 4: About the Data Explorer
   # ============================================================================
   
-  tabPanel("About the Data Explorer", value = "about",
+  tabPanel(title =
+             div(
+               "About the Data Explorer",
+               bsButton("about_info", 
+                        label = "", 
+                        icon = icon("info", 
+                                    lib = "font-awesome"), 
+                        size = "extra-small"
+               )
+             ),
+           value = "about",
+           
            fluidRow(
              column(12,
                     tags$div(
