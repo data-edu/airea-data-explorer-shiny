@@ -142,6 +142,8 @@ server <- function(input, output, session) {
     session$sendCustomMessage("updateCZMetric", input$cz_metric)
   })
   
+  
+  
   # ============================================================================
   # Panel 1: Map
   # ============================================================================
@@ -377,8 +379,8 @@ server <- function(input, output, session) {
       )
     
     y_col <- if (metric == "pct") "airea_pct" else "total_airea_completions"
-    y_label <- if (metric == "pct") "AIREA Completion Percentage (%)" else "AIREA Completions"
-    title_txt <- if (metric == "pct") "AIREA Percentage Over Time" else "AIREA Completions Over Time"
+    y_label <- if (metric == "pct") "AIREA Credentials Percentage (%)" else "Number of AIREA Credentials"
+    title_txt <- if (metric == "pct") "AIREA Credentials Percentage Over Time" else "AIREA Credentials Over Time"
     title_txt <- paste(title_txt, "—", my_inst$instnm)
     
     # Join national average appropriate to metric
@@ -413,7 +415,7 @@ server <- function(input, output, session) {
   
   # CIP by award level stacked bar (most recent year for selected institution) using DuckDB
   output$supply_cip_award_bar <- renderPlot({
-    validate(need(!is.null(selected_institution()), "Select an institution above to view completions by CIP."))
+    validate(need(!is.null(selected_institution()), "Select an institution above to view credentials awarded by CIP."))
     
     my_inst <- selected_institution()
     
@@ -456,8 +458,8 @@ server <- function(input, output, session) {
         scale_y_continuous(position = "right") +
         scale_x_discrete(position = "top") +
         labs(
-          title = paste("AIREA completions by CIP and award level —", my_inst$instnm),
-          y = "Share of AIREA Completions",
+          title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm),
+          y = "Share of AIREA Award Types",
           x = NULL,
           fill = "Award level"
         ) +
@@ -478,8 +480,8 @@ server <- function(input, output, session) {
         scale_x_discrete(position = "top") +
         scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
-          title = paste("AIREA completions by CIP —", my_inst$instnm),
-          y = "Number of AIREA Completions",
+          title = paste("AIREA Credentials by CIP —", my_inst$instnm),
+          y = "AIREA Credentials",
           x = NULL,
           fill = "Award level"
         ) +
@@ -810,7 +812,8 @@ server <- function(input, output, session) {
       }
     }
     
-    p <- ggplot(demand_selected, aes(x = year, y = .data[[y_col]])) +
+    p <- 
+      ggplot(demand_selected, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$blue) +
       geom_point(size = 2.5, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),

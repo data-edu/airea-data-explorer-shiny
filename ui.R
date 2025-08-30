@@ -172,6 +172,24 @@ navbarPage(
            # Map container
            fluidRow(
              column(12,
+                    
+                    div(
+                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
+                      
+                      p("Which areas of the country have strong job demand in AIREA fields? Which community colleges confer a large percentage of their credentials in AIREA fields?", 
+                        icon("hand-point-up"),
+                        "Use the controls to filter by year or to search for an institution.",
+                        br(),
+                        br(),
+                        "Curious to see AIREA job postings represented in different ways?",
+                        icon("hand-point-up"),
+                        "Use the “Color By” filter to see the raw number of AIREA job postings, the percent of all job postings that are in AIREA fields, or the number of AIREA job postings per 1000 residents."
+                      )
+                      
+                    ),
+                    
+                    br(),
+                    
                     div(id="map", style="height:600px; width:100%;")
              )
            ),
@@ -191,9 +209,9 @@ navbarPage(
                                     selected = 2023
                         ),
                          selectInput("cz_metric", 
-                                     tags$h3("Color by:"), 
+                                     tags$h3("Color By:"), 
                                      choices = c(
-                                       "AIREA Job Postings" = "airea_job_posting",
+                                       "Number of AIREA Job Postings" = "airea_job_posting",
                                        "% AIREA Postings" = "pct_green",
                                        "AIREA Jobs / 1,000 Residents" = "per1000"
                                      )
@@ -235,23 +253,26 @@ navbarPage(
              ),
            value = "treemap",
            
-           h2("Institutions by Mean Completions (All Years)"),
+           h2("Credentials Awarded at Community Colleges in AIREA Fields"),
            
            # Top Row: Centered search for institution
            fluidRow(
              column(12,
                     div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align:center;",
-                      h4(
+                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
+                      
+                      p("Which community colleges confer the most credentials in AIREA fields? For any given college, what types of credentials are awarded and in what fields? How has this changed over time?",
+                        br(),
+                        br(),
                         icon("hand-point-up"),
-                        "Select an institution to see its AIREA completion trends over time:"
+                        "Search for a community college to see its top AIREA programs and trends over time in the visualizations below."
                       ),
                       br(),
                       div(
                         style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                         selectizeInput(
                           inputId = "supply_search",
-                          label   = tags$span("Search Institution", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                          label   = span("Search Institution:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                           choices = NULL,
                           options = list(placeholder = 'Search institution...', create = FALSE),
                           width   = "100%"   # fills the 80% container
@@ -262,15 +283,15 @@ navbarPage(
                       div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end; margin-top:10px;",
                         selectInput(
                           inputId = "supply_leader_airea",
-                          label = "Leaders: Mean AIREA Completions (per year)",
+                          label = "Top 50 colleges by total AIREA credentials (mean per year):",
                           choices = NULL,
-                          width = "30%"
+                          width = "40%"
                         ),
                         selectInput(
                           inputId = "supply_leader_pct",
-                          label = "Leaders: AIREA % of completions",
+                          label = "Top 50 colleges by AIREA % of credentials (mean per year):",
                           choices = NULL,
-                          width = "30%"
+                          width = "40%"
                         )
                       )
                       
@@ -280,6 +301,8 @@ navbarPage(
            
            hr(),
            
+           
+           
            # Second Row: Time series plot (full width)
            fluidRow(
              column(12,
@@ -288,8 +311,8 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_metric",
-                        label = "Select:",
-                        choices = c("AIREA Completions" = "airea", "AIREA Percentage" = "pct"),
+                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                        choices = c("AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
                         selected = "airea",
                         inline = TRUE
                       )
@@ -302,6 +325,8 @@ navbarPage(
            
            hr(),
            
+           
+           
            # Third Row: CIP by Award Level (Stacked Bar)
            fluidRow(
              column(12,
@@ -310,10 +335,10 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_bar_style",
-                        label = "Select:",
+                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                         choices = c(
-                          "Filled" = "filled",
-                          "Stacked" = "single"
+                          "Proportion of Award Types within Programs" = "filled",
+                          "Number of Credentials by Program" = "single"
                         ),
                         selected = "filled",
                         inline = TRUE
@@ -484,47 +509,64 @@ navbarPage(
            
            fluidRow(
              column(12,
-                    tags$div(
+                    div(
                       style = "background-color: #ffffff; padding: 20px; border-radius: 6px;",
-                      tags$h2("About the Data Explorer"),
-                      tags$p("The AIERA Data Explorer's interactive maps and data visualizations show how community college  AIREA program completions align with nearby Advanced Infrastructure, Energy, and Agriculture (AIREA) job postings by commuting zone."),
-                      tags$br(),
-                      tags$h3("What are AIREA Degrees?"),
+                      h2("About the Data Explorer"),
+                      p("The AIERA Data Explorer's interactive maps and data visualizations show how community college  AIREA program completions align with nearby Advanced Infrastructure, Energy, and Agriculture (AIREA) job postings by commuting zone."),
+                      
+                      br(),
+                      hr(),
+                      h3("What are AIREA Degrees?"),
                       tags$p("To identify degree programs that prepare students for careers in Advanced Infrastructure, Energy, and Agriculture (AIREA), we began with the Greening the World of Work framework advanced by O*NET. This framework highlights occupations connected to the green economy, organized by Standard Occupational Classification (SOC) codes."),
-                      tags$br(),
-                      tags$p("We then used a SOC-to-CIP crosswalk to link these occupations to academic programs, classified by the Classification of Instructional Programs (CIP) codes. However, we recognized that 'green jobs' represent only part of the U.S. workforce connected to sustainability and future-ready skills. Hewing exclusively to O*NET framework meant excluding a swath of critical high-wage, high-opportunity degree programs in Construction Trades, Precision Production, and Engineering."),
-                      tags$br(),
-                      tags$p("To capture this broader landscape, we expanded our approach to include 6-digit CIP codes within the following 2-digit categories: (01) Agriculture and Agricultural Operations; (02) Natural Resources and Conservation; (03) Architecture; (14) Engineering; (15) Engineering Technologies and Technicians; (26) Biological Sciences; (40) Physical Sciences; (41) Science Technologies and Technicians; (46) Construction Trades; (47) Mechanic and Repair Technologies and Technicians; (48) Precision Production; and (49) Transportation and Materials Moving. We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional  6-digit CIP codes that did not align with the green economy or with skills needed to sustain it. We determined, for example, that Epidemiology had only an indirect connection to the AIREA framework."),
-                      tags$br(),
-                      tags$p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. This process identified 429 distinct 6-digit CIP codes (degree) programs."),
-                      tags$br(),
-                      tags$h3("What are AIREA jobs?"),
-                      tags$p("On the jobs side, we also began with O*NET's Greening the World of Work framework, which classifies 'green' occupations across the U.S. labor market. These occupations span a wide range of industries—from renewable energy and environmental protection to construction, agriculture, and advanced manufacturing. But just as with degrees, we recognized that a narrow focus on 'green jobs' might miss critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."),
-                      tags$br(),
-                      tags$p("By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."),
-                      tags$br(),
-                      tags$p("Our process for identifying AIREA jobs began with first identifying the degree programs described above. We then mapped these programs to related occupations using the widely established NCES CIP-to-SOC crosswalk, which often connects multiple occupations to a single degree program. Next, we conducted a manual review of each SOC code and flagged those without a clear or direct connection to the AIREA framework. To strengthen this process, we also loaded SOC job titles, descriptions, and skills data from O*NET into several LLMs for additional review, flagging, and cross-checking. Through this multi-step process, we identified 283 distinct SOC codes that define the set of AIREA jobs."),
-                      tags$br(),
-                      tags$p("Users will note a high degree of variety in AIREA SOC occupations. First, AIREA jobs require different levels of education—many can be accessed with some college or sub-baccalaureate training, while others require bachelor's degrees or higher. Second, the jobs span a wide range of industries, from construction, energy, and agriculture to engineering, transportation, and advanced manufacturing. Third, they encompass both traditional 'green' occupations (such as wind turbine technicians or solar installers) and related roles (such as electrical lineworkers or construction managers) that share overlapping skills and are essential to building sustainable infrastructure."),
-                      tags$br(),
-                      tags$p("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. As the graph illustrates, these jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor's degree or higher, as well as for those requiring less than a bachelor's degree. In fact, for sub-baccalaureate roles, AIREA occupations pay higher average annual wages than comparable non-AIREA occupations."),
-                      tags$br(),
-                      tags$p("Download the complete list of AIREA occupations and corresponding programs of study here."),
-                      tags$br(),
-                      tags$h3("Data Sources"),
-                      tags$h4("AIREA Credentials Awarded"),
-                      tags$p("For AIREA credentials awarded, we used the U.S. Department of Education's Integrated Postsecondary Education Data System (IPEDS). Specifically, we drew from IPEDS credentials awarded and institutional directory files covering the years 2010-2023. These data provide the foundation for tracking how many AIREA-related credentials community colleges have awarded over time, and where those programs are located."),
-                      tags$br(),
-                      tags$h4("AIREA Job Postings"),
-                      tags$p("For AIREA jobs, we used job postings data from Lightcast, the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every BLS SOC code, with geographic detail down to the county level. This granularity allowed us to aggregate postings data to commuting zones, ensuring comparability with the geographic structure used in IPEDS. Like IPEDS, the Lightcast data include detailed geographic identifiers, which enabled us to directly map both degree completion and labor market demand into the same commuting zone framework."),
-                      tags$br(),
-                      tags$h3("What is a commuting zone?"),
+                      br(),
+                      p("We then used a SOC-to-CIP crosswalk to link these occupations to academic programs, classified by the Classification of Instructional Programs (CIP) codes. However, we recognized that 'green jobs' represent only part of the U.S. workforce connected to sustainability and future-ready skills. Hewing exclusively to O*NET framework meant excluding a swath of critical high-wage, high-opportunity degree programs in Construction Trades, Precision Production, and Engineering."),
+                      
+                      br(),
+                      p("To capture this broader landscape, we expanded our approach to include 6-digit CIP codes within the following 2-digit categories: (01) Agriculture and Agricultural Operations; (02) Natural Resources and Conservation; (03) Architecture; (14) Engineering; (15) Engineering Technologies and Technicians; (26) Biological Sciences; (40) Physical Sciences; (41) Science Technologies and Technicians; (46) Construction Trades; (47) Mechanic and Repair Technologies and Technicians; (48) Precision Production; and (49) Transportation and Materials Moving. We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional  6-digit CIP codes that did not align with the green economy or with skills needed to sustain it. We determined, for example, that Epidemiology had only an indirect connection to the AIREA framework."),
+                      
+                      br(),
+                      p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. This process identified 429 distinct 6-digit CIP codes (degree) programs."),
+                      
+                      br(),
+                      hr(),
+                      h3("What are AIREA Jobs?"),
+                      p("On the jobs side, we also began with O*NET's Greening the World of Work framework, which classifies 'green' occupations across the U.S. labor market. These occupations span a wide range of industries—from renewable energy and environmental protection to construction, agriculture, and advanced manufacturing. But just as with degrees, we recognized that a narrow focus on 'green jobs' might miss critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."),
+                      
+                      br(),
+                      p("By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."),
+                      
+                      br(),
+                      p("Our process for identifying AIREA jobs began with first identifying the degree programs described above. We then mapped these programs to related occupations using the widely established NCES CIP-to-SOC crosswalk, which often connects multiple occupations to a single degree program. Next, we conducted a manual review of each SOC code and flagged those without a clear or direct connection to the AIREA framework. To strengthen this process, we also loaded SOC job titles, descriptions, and skills data from O*NET into several LLMs for additional review, flagging, and cross-checking. Through this multi-step process, we identified 283 distinct SOC codes that define the set of AIREA jobs."),
+                      
+                      br(),
+                      p("Users will note a high degree of variety in AIREA SOC occupations. First, AIREA jobs require different levels of education—many can be accessed with some college or sub-baccalaureate training, while others require bachelor's degrees or higher. Second, the jobs span a wide range of industries, from construction, energy, and agriculture to engineering, transportation, and advanced manufacturing. Third, they encompass both traditional 'green' occupations (such as wind turbine technicians or solar installers) and related roles (such as electrical lineworkers or construction managers) that share overlapping skills and are essential to building sustainable infrastructure."),
+                      
+                      br(),
+                      p("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. As the graph illustrates, these jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor's degree or higher, as well as for those requiring less than a bachelor's degree. In fact, for sub-baccalaureate roles, AIREA occupations pay higher average annual wages than comparable non-AIREA occupations."),
+                      
+                      br(),
+                      p("Download the complete list of AIREA occupations and corresponding programs of study here."),
+                      
+                      br(),
+                      hr(),
+                      h3("Data Sources"),
+                      h4("AIREA Credentials Awarded"),
+                      p("For AIREA credentials awarded, we used the U.S. Department of Education's Integrated Postsecondary Education Data System (IPEDS). Specifically, we drew from IPEDS credentials awarded and institutional directory files covering the years 2010-2023. These data provide the foundation for tracking how many AIREA-related credentials community colleges have awarded over time, and where those programs are located."),
+                      
+                      br(),
+                      h4("AIREA Job Postings"),
+                      p("For AIREA jobs, we used job postings data from Lightcast, the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every BLS SOC code, with geographic detail down to the county level. This granularity allowed us to aggregate postings data to commuting zones, ensuring comparability with the geographic structure used in IPEDS. Like IPEDS, the Lightcast data include detailed geographic identifiers, which enabled us to directly map both degree completion and labor market demand into the same commuting zone framework."),
+                      
+                      br(),
+                      hr(),
+                      h3("What is a Commuting Zone?"),
                       tags$p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both credentials awarded (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
                     )
              )
-           )
-           ,
-           tags$hr(),
+           ),
+           
+           br(),
+           hr(),
            fluidRow(
              column(12,
                     tags$div(
@@ -538,6 +580,8 @@ navbarPage(
                     )
              )
            ),
+           
+           br(),
            fluidRow(
              column(12,
                     tags$div(
