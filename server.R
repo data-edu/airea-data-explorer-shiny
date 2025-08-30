@@ -481,7 +481,7 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
           title = paste("AIREA Credentials by CIP —", my_inst$instnm),
-          y = "AIREA Credentials",
+          y = "Number of AIREA Credentials",
           x = NULL,
           fill = "Award level"
         ) +
@@ -870,7 +870,7 @@ server <- function(input, output, session) {
     if (nrow(plot_df) == 0) return(NULL)
     
     title_txt <- paste(
-      "Education requirement share by occupation —",
+      "Top AIREA Occupations —",
       gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label))
     )
     
@@ -884,8 +884,8 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::percent) +
         labs(
           x = NULL,
-          y = "Share of job postings",
-          fill = "Education requirement",
+          y = "Share of Job Postings",
+          fill = "Education Requirement",
           title = title_txt
         ) +
         ccrc_theme +
@@ -906,8 +906,8 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::comma) +
         labs(
           x = NULL,
-          y = "Number of job postings",
-          fill = "Education requirement",
+          y = "Number of Job Postings",
+          fill = "Education Requirement",
           title = title_txt
         ) +
         ccrc_theme +

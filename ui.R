@@ -312,7 +312,7 @@ navbarPage(
                       radioButtons(
                         inputId = "supply_metric",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
-                        choices = c("AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
+                        choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
                         selected = "airea",
                         inline = TRUE
                       )
@@ -337,7 +337,7 @@ navbarPage(
                         inputId = "supply_bar_style",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                         choices = c(
-                          "Proportion of Award Types within Programs" = "filled",
+                          "Share of Award Types within Programs" = "filled",
                           "Number of Credentials by Program" = "single"
                         ),
                         selected = "filled",
@@ -371,18 +371,19 @@ navbarPage(
              ),
            value = "demand", 
            
-           h2("Commuting Zones by AIREA Job Posting Percentage (All Years)"),
+           h2("AIREA Job Postings by Commuting Zone"),
            
            # Top Row: Centered search for commuting zone
            fluidRow(
              column(12,
                     div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px; text-align:center;",
-                      h4(
+                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
+                      p("What parts of the country have strong occupational demand in AIREA fields? How does the number of AIREA jobs posted compare to the total number of job postings? How has this changed over time?",
+                        br(),
+                        br(),
                         icon("hand-point-up"),
-                        "Select a commuting zone to see the top occupations by AIREA job postings.", br(),
-                        "Use the controls to adjust the number of occupations and switch between total bars and shares by education requirement (most recent year)."
-                      ),
+                        "Search for a commuting zone to see its top AIREA job postings, education requirements, and trends over time in the visualizations below."
+                        ),
                       
                       br(),
                       div(
@@ -400,21 +401,21 @@ navbarPage(
                         div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end;",
                           selectInput(
                             inputId = "cz_leader_posts",
-                            label = "Leaders: Mean AIREA Job Postings (per year)",
+                            label = "Top 50 zones by total AIREA postings (mean per year)",
                             choices = NULL,
-                            width = "25%"
+                            width = "30%"
                           ),
                           selectInput(
                             inputId = "cz_leader_pct",
-                            label = "Leaders: AIREA % of all postings",
+                            label = "Top 50 zones by AIREA % of all postings (mean per year)",
                             choices = NULL,
-                            width = "25%"
+                            width = "30%"
                           ),
                           selectInput(
                             inputId = "cz_leader_per1000",
-                            label = "Leaders: Mean AIREA postings per 1,000 residents",
+                            label = "Top 50 zones by AIREA postings per 1,000 residents (mean per year)",
                             choices = NULL,
-                            width = "25%"
+                            width = "30%"
                           )
                         )
                       
@@ -434,9 +435,9 @@ navbarPage(
                         inputId = "demand_metric",
                         label = NULL,
                         choices = c(
-                          "AIREA job posts" = "airea",
-                          "AIREA % of all posts" = "pct",
-                          "AIREA posts per 100,000" = "per100k"
+                          "Number of AIREA Job Postings" = "airea",
+                          "AIREA % of All Postings" = "pct",
+                          "AIREA Postings per 100,000" = "per100k"
                         ),
                         selected = "airea",
                         inline = TRUE
@@ -460,7 +461,7 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       numericInput(
                         inputId = "num_socs",
-                        label = "Number of occupations (1–40) to display:",
+                        label = "Number of Occupations (1–40) to Display:",
                         value = 10,
                         min = 1,
                         max = 40,
@@ -472,8 +473,8 @@ navbarPage(
                         inputId = "demand_bar_style",
                         label = NULL,
                         choices = c(
-                          "Filled" = "filled",
-                          "Stacked" = "single"
+                          "Share of Job Postings" = "filled",
+                          "Number of Job Postings" = "single"
                         ),
                         selected = "single",
                         inline = TRUE
