@@ -47,11 +47,9 @@ mapsupply <- readRDS("data/mapsupply.rds")
 # Tab 2 table source (replace interactive table with this CSV)
 supply_table_df <- read_csv("data/supply-table.csv", show_col_types = FALSE)
 
-# Ensure pct_airea_completions exists (calculate if missing)
-if (!"pct_airea_completions" %in% names(supply_table_df)) {
-  supply_table_df <- supply_table_df %>%
-    mutate(pct_airea_completions = ifelse(mean_completions > 0, mean_airea_completions / mean_completions, 0))
-}
+# Precomputed leader lists (optional). Fallback logic below will compute if missing
+leaders_supply_airea <- tryCatch(read_csv("data/leaders_supply_airea.csv", show_col_types = FALSE), error = function(e) NULL)
+leaders_supply_pct   <- tryCatch(read_csv("data/leaders_supply_pct.csv", show_col_types = FALSE),   error = function(e) NULL)
 
 # National averages for Tab 2 (Degree Completions) and Tab 3 (Job Postings)
 supply_nat <- read_csv("data/supply-nat-ave.csv", show_col_types = FALSE)
@@ -78,9 +76,8 @@ onStop(function() {
 # Tab 3 table source (CSV summary for CZs)
 cz_table_df <- read_csv("data/cz-summary-table.csv")
 
-
-
-
+# Precomputed CZ leaders (optional)
+leaders_cz <- tryCatch(read_csv("data/leaders_cz.csv", show_col_types = FALSE), error = function(e) NULL)
 
 # ==============================================================================
 # App color palette and plot theme (match CSS)
@@ -225,7 +222,6 @@ server <- function(input, output, session) {
   
   # Populate and react to Institution search (Tab 2)
   observe({
-    if (!is.null(supply_table_df) && nrow(supply_table_df) > 0) {
       name_map <- names(supply_table_df)
       lower_names <- tolower(name_map)
       inst_candidates <- c("instnm", "institution", "school", "name")
@@ -238,22 +234,31 @@ server <- function(input, output, session) {
         choices = sort(unique(as.character(supply_table_df[[inst_col]]))), server = TRUE
       )
       
-      leaders_airea <- supply_table_df %>%
-        select(instnm, mean_airea_completions) %>%
-        arrange(desc(mean_airea_completions)) %>%
-        slice_head(n = 150) %>%
-        mutate(label = paste0(instnm, " — ", scales::comma(round(mean_airea_completions))))
+      leaders_airea <- if (!is.null(leaders_supply_airea)) {
+        leaders_supply_airea %>%
+          mutate(label = paste0(instnm, " — ", scales::comma(round(mean_airea_completions))))
+      } else {
+        supply_table_df %>%
+          select(instnm, mean_airea_completions) %>%
+          arrange(desc(mean_airea_completions)) %>%
+          slice_head(n = 150) %>%
+          mutate(label = paste0(instnm, " — ", scales::comma(round(mean_airea_completions))))
+      }
       updateSelectInput(session, "supply_leader_airea",
                         choices = setNames(leaders_airea$instnm, leaders_airea$label))
       
-      leaders_pct <- supply_table_df %>%
-        select(instnm, pct_airea_completions) %>%
-        arrange(desc(pct_airea_completions)) %>%
-        slice_head(n = 150) %>%
-        mutate(label = paste0(instnm, " — ", round(pct_airea_completions * 100, 1), "%"))
+      leaders_pct <- if (!is.null(leaders_supply_pct)) {
+        leaders_supply_pct %>%
+          mutate(label = paste0(instnm, " — ", round(pct_airea_completions * 100, 1), "%"))
+      } else {
+        supply_table_df %>%
+          select(instnm, pct_airea_completions) %>%
+          arrange(desc(pct_airea_completions)) %>%
+          slice_head(n = 150) %>%
+          mutate(label = paste0(instnm, " — ", round(pct_airea_completions * 100, 1), "%"))
+      }
       updateSelectInput(session, "supply_leader_pct",
                         choices = setNames(leaders_pct$instnm, leaders_pct$label))
-    }
   })
   
   # Sync institution selection from any control into a single reactiveVal
@@ -297,8 +302,8 @@ server <- function(input, output, session) {
         `Mean Completions (per year)` = scales::comma(round(`Mean Completions (per year)`)),
         `Mean AIREA Completions (per year)` = scales::comma(round(`Mean AIREA Completions (per year)`)),
         `Mean Enrollment (per year)` = scales::comma(round(`Mean Enrollment (per year)`)),
-        `Rural` = ifelse(is.na(`Rural`) | `Rural` < 1, "No", "Yes"),
-        `Tribal` = ifelse(is.na(`Tribal`) | `Tribal` < 1, "No", "Yes")
+        `Rural` = ifelse(is.na(`Rural`) | `Rural` == 0, "No", "Yes"),
+        `Tribal` = ifelse(is.na(`Tribal`) | `Tribal` == 1, "No", "Yes")
       )
     
     DT::datatable(
@@ -419,34 +424,30 @@ server <- function(input, output, session) {
     
     my_inst <- selected_institution()
     
-    # Determine most recent year for this institution from DuckDB
-    inst_years <- supply_tbl %>%
-      filter(instnm == !!my_inst$instnm) %>%
-      summarize(max_year = max(year, na.rm = TRUE)) %>%
-      collect()
-    
-    if (nrow(inst_years) == 0 || is.na(inst_years$max_year)) return(NULL)
-    most_recent_year <- inst_years$max_year[[1]]
-    
-    selected_instm_year <- supply_tbl %>%
-      filter(instnm == !!my_inst$instnm, year == !!most_recent_year) %>%
-      collect()
-    
-    if (nrow(selected_instm_year) == 0) return(NULL)
-    
-    bar_style <- input$supply_bar_style
-    if (is.null(bar_style)) bar_style <- "filled"
-    
-    plot_df <- selected_instm_year %>%
+    # Year selection: "Overall" aggregates across all years; else filter to chosen year
+    year_choice <- input$supply_bar_year
+    base_tbl <- supply_tbl %>% filter(instnm == !!my_inst$instnm)
+    title_suffix <- " — Overall"
+    if (!is.null(year_choice) && !identical(year_choice, "Overall")) {
+      suppressWarnings({ yr_num <- as.integer(year_choice) })
+      if (is.na(yr_num)) return(NULL)
+      base_tbl <- base_tbl %>% filter(year == !!yr_num)
+      title_suffix <- paste0(" — ", yr_num)
+    }
+    plot_df <- base_tbl %>%
       group_by(ciptitle, award_level) %>%
       summarize(total_airea_completions = sum(airea_completions, na.rm = TRUE), .groups = "drop") %>%
+      collect() %>%
       filter(total_airea_completions > 0) %>%
       mutate(
         award_level = label_to_factor(award_level),
         award_level = forcats::fct_rev(award_level)
       )
-    
     if (nrow(plot_df) == 0) return(NULL)
+    
+    bar_style <- input$supply_bar_style
+    if (is.null(bar_style)) bar_style <- "filled"
+    
     
     if (bar_style == "filled") {
       ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
@@ -458,7 +459,7 @@ server <- function(input, output, session) {
         scale_y_continuous(position = "right") +
         scale_x_discrete(position = "top") +
         labs(
-          title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm),
+          title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm, title_suffix),
           y = "Share of AIREA Award Types",
           x = NULL,
           fill = "Award level"
@@ -480,7 +481,7 @@ server <- function(input, output, session) {
         scale_x_discrete(position = "top") +
         scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
-          title = paste("AIREA Credentials by CIP —", my_inst$instnm),
+          title = paste("AIREA Credentials by CIP —", my_inst$instnm, title_suffix),
           y = "Number of AIREA Credentials",
           x = NULL,
           fill = "Award level"
@@ -499,20 +500,10 @@ server <- function(input, output, session) {
   # Panel 3: Job Postings
   # ============================================================================
   
-  # Note: demand_year_data reactive is only used as fallback when cz_table_df is empty
-  demand_year_data <- reactive({
-    data.frame(
-      CZ_label = character(0),
-      total_posts = numeric(0),
-      airea_posts = numeric(0),
-      airea_percentage = numeric(0),
-      posts_per_1000 = numeric(0)
-    )
-  })
+  
   
   # Populate and react to CZ search (Tab 3)
   observe({
-    if (!is.null(cz_table_df) && nrow(cz_table_df) > 0) {
       name_map <- names(cz_table_df)
       lower_names <- tolower(name_map)
       candidates <- c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel")
@@ -525,48 +516,25 @@ server <- function(input, output, session) {
           choices = sort(unique(as.character(cz_table_df[[label_col]]))), server = TRUE
         )
         
-        # Build leader lists from DuckDB (collect before summarise)
+        # Build leader lists from precomputed CSV
         prettify_cz <- function(x) gsub("^\\d+ ", "", gsub(" CZ$", "", x))
-        leaders_src <- demand_tbl %>%
-          filter(year != 2025) %>%
-          select(cz_label, year, total_job_postings, airea, mean_population) %>%
-          collect()
-        
-        leaders <- leaders_src %>%
-          group_by(cz_label, year) %>%
-          summarise(
-            posts_total = sum(total_job_postings, na.rm = TRUE),
-            posts_airea = sum(dplyr::if_else(airea == 1, total_job_postings, 0), na.rm = TRUE),
-            pop_year    = mean(mean_population, na.rm = TRUE),
-            .groups = "drop"
-          ) %>%
-          group_by(cz_label) %>%
-          summarise(
-            mean_airea_posts = mean(posts_airea, na.rm = TRUE),
-            mean_pct         = mean(dplyr::if_else(posts_total > 0, posts_airea / posts_total, NA_real_), na.rm = TRUE),
-            mean_per1000     = mean(dplyr::if_else(!is.na(pop_year) & pop_year > 0, (posts_airea / pop_year) * 1000, NA_real_), na.rm = TRUE),
-            .groups = "drop"
-          )
-        
+        leaders <- leaders_cz
         leaders_posts <- leaders %>%
           arrange(desc(mean_airea_posts)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", scales::comma(round(mean_airea_posts))))
         updateSelectInput(session, "cz_leader_posts",
                           choices = setNames(as.character(leaders_posts$cz_label), leaders_posts$label))
-        
         leaders_pct <- leaders %>%
           arrange(desc(mean_pct)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", round(mean_pct * 100, 1), "%"))
         updateSelectInput(session, "cz_leader_pct",
                           choices = setNames(as.character(leaders_pct$cz_label), leaders_pct$label))
-        
         leaders_per1k <- leaders %>%
           arrange(desc(mean_per1000)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", scales::comma_format(accuracy = 0.1)(mean_per1000)))
         updateSelectInput(session, "cz_leader_per1000",
                           choices = setNames(as.character(leaders_per1k$cz_label), leaders_per1k$label))
       }
-    }
   })
   
   # Sync CZ selection from any control into a single reactiveVal
@@ -583,18 +551,14 @@ server <- function(input, output, session) {
     if (!is.null(input$cz_leader_per1000) && nzchar(input$cz_leader_per1000)) selected_cz_name(input$cz_leader_per1000)
   }, ignoreInit = TRUE)
   
-  # Selected CZ from search (fallback to first in table if empty)
+  # Selected CZ from search
   selected_cz <- reactive({
-    if (!is.null(selected_cz_name()) && nzchar(selected_cz_name())) {
-      data.frame(CZ_label = as.character(selected_cz_name()), stringsAsFactors = FALSE)
-    } else {
-      NULL
-    }
+    req(selected_cz_name())
+    data.frame(CZ_label = as.character(selected_cz_name()), stringsAsFactors = FALSE)
   })
   
-  # All CZs table: prefer CSV if present; otherwise fall back to computed table
+  # All CZs table: display the CSV contents directly
   output$demand_table <- DT::renderDT({
-    if (nrow(cz_table_df) > 0) {
       df <- cz_table_df
       # Identify label and percent columns if present
       lower_names <- tolower(names(df))
@@ -674,40 +638,13 @@ server <- function(input, output, session) {
         style = "bootstrap",
         rownames = FALSE
       )
-    } else {
-      my_df_demand <- demand_year_data() %>%
-        select(
-          `Commuting Zone` = CZ_label,
-          `Mean Total Job Postings` = total_posts,
-          `Mean AIREA Job Postings` = airea_posts,
-          `AIREA %` = airea_percentage,
-          `Mean AIREA postings/1,000 residents` = posts_per_1000
-        ) %>%
-        mutate(
-          `Commuting Zone` = gsub("^[0-9]+ ", "", gsub(" CZ$", "", `Commuting Zone`)),
-          `Mean Total Job Postings` = scales::comma(`Mean Total Job Postings`),
-          `Mean AIREA Job Postings` = scales::comma(`Mean AIREA Job Postings`),
-          `Mean AIREA postings/1,000 residents` = scales::comma_format(accuracy = 0.1)(`Mean AIREA postings/1,000 residents`)
-        )
-      
-      DT::datatable(my_df_demand,
-                    selection = list(mode = 'single', selected = 1),
-                    options = list(
-                      pageLength = 10,
-                      lengthChange = FALSE
-                    ),
-                    style="bootstrap"
-      ) %>%
-        DT::formatPercentage(columns = "AIREA %", digits = 1)
-    }
   })
   
   # Download handler for demand table (export the displayed data)
   output$download_demand_table <- downloadHandler(
     filename = function() paste0("airea_cz_job_postings_", Sys.Date(), ".csv"),
     content = function(file) {
-      if (nrow(cz_table_df) > 0) {
-        df <- cz_table_df
+      df <- cz_table_df
         lower_names <- tolower(names(df))
         label_idx <- match(c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel"), lower_names)
         label_idx <- label_idx[!is.na(label_idx)]
@@ -729,10 +666,6 @@ server <- function(input, output, session) {
           }
         }
         readr::write_csv(df, file)
-      } else {
-        # Fall back to an empty file if cz_table_df missing
-        readr::write_csv(tibble::tibble(), file)
-      }
     }
   )
   
@@ -833,50 +766,51 @@ server <- function(input, output, session) {
     p
   })
   
-  # Demand stacked bar: Top occupations by postings, stacked by education requirement (most recent year)
-  output$demand_soc_edreq_bar <- renderPlot({
-    validate(need(!is.null(selected_cz()), "Select a commuting zone above to view occupations."))
-    
+  # Build plot data once for reuse (also drives dynamic height)
+  demand_soc_df <- reactive({
+    req(selected_cz())
     my_cz <- selected_cz()
-    
-    # Determine most recent year available for this CZ
-    cz_years <- demand_tbl %>%
-      filter(cz_label == !!my_cz$CZ_label, year != 2025) %>%
-      summarise(max_year = max(year, na.rm = TRUE)) %>%
-      collect()
-    
-    if (nrow(cz_years) == 0 || is.na(cz_years$max_year)) return(NULL)
-    most_recent_year <- cz_years$max_year[[1]]
-    
-    plot_df <- demand_tbl %>%
-      filter(cz_label == !!my_cz$CZ_label, year == !!most_recent_year) %>%
+    year_choice <- input$demand_bar_year
+    base_tbl <- demand_tbl %>%
+      filter(cz_label == !!my_cz$CZ_label, year != 2025, airea == 1)
+    if (!is.null(year_choice) && !identical(year_choice, "Overall")) {
+      suppressWarnings({ selected_year <- as.integer(year_choice) })
+      validate(need(!is.na(selected_year), "Invalid year selection"))
+      base_tbl <- base_tbl %>% filter(year == !!selected_year)
+    }
+    # Use user-selected limit if provided; otherwise default to 10
+    n_to_show <- if (!is.null(input$num_socs) && is.finite(input$num_socs)) as.integer(input$num_socs) else 10
+    base_tbl %>%
+      group_by(soc_title, ed_req) %>%
+      summarise(total_postings = sum(total_job_postings, na.rm = TRUE), .groups = "drop") %>%
       collect() %>%
       filter(!is.na(soc_title)) %>%
-      filter(airea == 1) %>%
-      select(soc_title, ed_req, total_job_postings) %>%
       mutate(
         ed_req = label_to_factor(ed_req),
         ed_req = forcats::fct_rev(ed_req),
         ed_req = forcats::fct_na_value_to_level(ed_req, "Missing")
       ) %>%
-      group_by(soc_title, ed_req) %>%
-      summarise(total_postings = sum(total_job_postings, na.rm = TRUE), .groups = "drop") %>%
       group_by(soc_title) %>%
       mutate(total_soc = sum(total_postings)) %>%
       ungroup() %>%
-      slice_max(order_by = total_soc, n = pmin(ifelse(is.null(input$num_socs), 10, input$num_socs), 40), with_ties = FALSE) %>%
+      slice_max(order_by = total_soc, n = n_to_show, with_ties = FALSE) %>%
       mutate(soc_title = forcats::fct_reorder(soc_title, total_soc))
-    
-    if (nrow(plot_df) == 0) return(NULL)
-    
+  })
+
+  output$demand_soc_edreq_bar <- renderPlot({
+    req(selected_cz())
+    my_cz <- selected_cz()
+    year_choice <- input$demand_bar_year
+    title_suffix <- if (!is.null(year_choice) && !identical(year_choice, "Overall")) paste0(" — ", year_choice) else " — Overall"
     title_txt <- paste(
       "Top AIREA Occupations —",
-      gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label))
+      gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)),
+      title_suffix
     )
-    
+    plot_df <- demand_soc_df()
+    validate(need(nrow(plot_df) > 0, "No data for selection"))
     bar_style <- input$demand_bar_style
     if (is.null(bar_style)) bar_style <- "single"
-    
     if (bar_style == "filled") {
       ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
         geom_col(position = "fill") +
@@ -922,5 +856,11 @@ server <- function(input, output, session) {
         scale_fill_manual(values = ccrc_palette) +
         guides(fill = guide_legend(nrow = 3, byrow = TRUE))
     }
+  }, height = function() {
+    df <- demand_soc_df()
+    base <- 120
+    px_per_bar <- 26
+    n_bars <- length(unique(df$soc_title))
+    max(450, base + px_per_bar * n_bars)
   })
 }
