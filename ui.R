@@ -305,6 +305,8 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
+                    plotOutput("supply_degrees_by_institution", height = "400px"),
+                    br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       radioButtons(
@@ -315,8 +317,6 @@ navbarPage(
                         inline = FALSE
                       )
                     ),
-                    br(),
-                    plotOutput("supply_degrees_by_institution", height = "400px"),
                     br()
              )
            ),
@@ -331,6 +331,9 @@ navbarPage(
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      br(),
+                      plotOutput("supply_cip_award_bar", height = "500px"),
+                      br(),
                       radioButtons(
                         inputId = "supply_bar_style",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
@@ -346,12 +349,10 @@ navbarPage(
                         inputId = "supply_bar_year",
                         label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
                         choices = c("Overall", 2010:2023),
-                        selected = 2023,
+                        selected = "Overall",
                         width = "60%"
                       )
                     ),
-                    br(),
-                    plotOutput("supply_cip_award_bar", height = "500px"),
                     br()
              )
            )
@@ -435,6 +436,8 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
+                    plotOutput("demand_cz_trend", height = "400px"),
+                    br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       radioButtons(
@@ -449,9 +452,6 @@ navbarPage(
                         inline = FALSE
                       )
                     ),
-                    
-                    br(),
-                    plotOutput("demand_cz_trend", height = "400px"),
                     br()
              )
            ),
@@ -466,6 +466,9 @@ navbarPage(
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       
+                      br(),
+                      plotOutput("demand_soc_edreq_bar", height = "500px"),
+                      br(),
                       radioButtons(
                         inputId = "demand_bar_style",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
@@ -492,14 +495,11 @@ navbarPage(
                         inputId = "demand_bar_year",
                         label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
                         choices = c("Overall", 2010:2023),
-                        selected = 2023,
+                        selected = "Overall",
                         width = "60%"
                       ),
                       br()
                     ),
-                    
-                    br(),
-                    plotOutput("demand_soc_edreq_bar", height = "500px"),
                     br()
              )
            )
@@ -696,6 +696,19 @@ navbarPage(
                       tags$style(HTML(
                         "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
                       DT::dataTableOutput("demand_table")
+                    )
+             )
+           ),
+           br(),
+           fluidRow(
+             column(12,
+                    tags$div(
+                      style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:60%; margin-left:auto; margin-right:auto;",
+                      tags$h4("Research Data Access"),
+                      p(
+                        "Researchers and analysts can access underlying datasets via our OSF repository:",
+                        tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
+                      )
                     )
              )
            )
