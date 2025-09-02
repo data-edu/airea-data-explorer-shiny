@@ -192,9 +192,9 @@ server <- function(input, output, session) {
         "<strong>Total Completions:</strong> ",
         format(search_result$inst_cmplt_tot, big.mark = ",", scientific = FALSE), "<br>",
         "<strong>AIREA Completions:</strong> ",
-        format(search_result$inst_perc_acea_tot * search_result$inst_cmplt_tot, big.mark = ",", scientific = FALSE), "<br>",
+        format(search_result$inst_perc_airea_tot * search_result$inst_cmplt_tot, big.mark = ",", scientific = FALSE), "<br>",
         "<strong>AIREA Percentage:</strong> ",
-        sprintf("%.1f%%", search_result$inst_perc_acea_tot * 100)
+        sprintf("%.1f%%", search_result$inst_perc_airea_tot * 100)
       )
       coords <- list(
         lng   = search_result$longitud,
