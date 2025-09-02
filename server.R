@@ -78,6 +78,10 @@ onStop(function() {
 # Tab 3 table source (CSV summary for CZs)
 cz_table_df <- read_csv("data/cz-summary-table.csv")
 
+
+
+
+
 # ==============================================================================
 # App color palette and plot theme (match CSS)
 # ==============================================================================
@@ -104,15 +108,25 @@ ccrc_palette <- c(
   ccrc_colors$green_dark
 )
 
-ccrc_theme <- theme_minimal(base_size = 13) +
+ccrc_theme <- 
+  theme_minimal(base_size = 13) +
   theme(
     text = element_text(color = ccrc_colors$gray),
-    plot.title = element_text(color = ccrc_colors$purple, face = "bold"),
-    axis.title = element_text(color = ccrc_colors$gray),
+    plot.title = 
+      element_text(
+        color = ccrc_colors$purple, 
+        face = "bold",
+        size = 24,
+        hjust = 0),
+    axis.title = element_text(color = ccrc_colors$gray, face = "bold"),
     axis.text = element_text(color = ccrc_colors$gray),
     panel.grid.minor = element_blank(),
     panel.grid.major = element_line(color = "#e8f5e8")
   )
+
+
+
+
 
 # ==============================================================================
 # Server Logic
@@ -127,6 +141,8 @@ server <- function(input, output, session) {
   observeEvent(input$cz_metric, {
     session$sendCustomMessage("updateCZMetric", input$cz_metric)
   })
+  
+  
   
   # ============================================================================
   # Panel 1: Map
@@ -363,8 +379,8 @@ server <- function(input, output, session) {
       )
     
     y_col <- if (metric == "pct") "airea_pct" else "total_airea_completions"
-    y_label <- if (metric == "pct") "AIREA Completion Percentage (%)" else "AIREA Completions"
-    title_txt <- if (metric == "pct") "AIREA Percentage Over Time" else "AIREA Completions Over Time"
+    y_label <- if (metric == "pct") "AIREA Credentials Percentage (%)" else "Number of AIREA Credentials"
+    title_txt <- if (metric == "pct") "AIREA Credentials Percentage Over Time" else "AIREA Credentials Over Time"
     title_txt <- paste(title_txt, "—", my_inst$instnm)
     
     # Join national average appropriate to metric
@@ -373,7 +389,8 @@ server <- function(input, output, session) {
       transmute(year,
                 nat_value = if (metric == "pct") pct_airea_completions * 100 else mean_airea_completions)
     
-    p <- ggplot(plot_df, aes(x = year, y = .data[[y_col]])) +
+    p <- 
+      ggplot(plot_df, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$teal) +
       geom_point(size = 2.5, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),
@@ -398,7 +415,7 @@ server <- function(input, output, session) {
   
   # CIP by award level stacked bar (most recent year for selected institution) using DuckDB
   output$supply_cip_award_bar <- renderPlot({
-    validate(need(!is.null(selected_institution()), "Select an institution above to view completions by CIP."))
+    validate(need(!is.null(selected_institution()), "Select an institution above to view credentials awarded by CIP."))
     
     my_inst <- selected_institution()
     
@@ -438,17 +455,19 @@ server <- function(input, output, session) {
         geom_col(position = "fill") +
         coord_flip() +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         labs(
-          title = paste("AIREA completions by CIP and award level —", my_inst$instnm),
-          y = "Share of AIREA Completions",
+          title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm),
+          y = "Share of AIREA Award Types",
           x = NULL,
           fill = "Award level"
         ) +
         scale_fill_manual(values = ccrc_palette) +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         )
     } else {
@@ -458,18 +477,19 @@ server <- function(input, output, session) {
         geom_col(position = "stack") +
         coord_flip() +
         ccrc_theme +
-        scale_y_continuous(labels = scales::comma) +
+        scale_x_discrete(position = "top") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
-          title = paste("AIREA completions by CIP —", my_inst$instnm),
-          y = "AIREA Completions",
+          title = paste("AIREA Credentials by CIP —", my_inst$instnm),
+          y = "Number of AIREA Credentials",
           x = NULL,
           fill = "Award level"
         ) +
         scale_fill_manual(values = ccrc_palette) +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         )
     }
@@ -792,7 +812,8 @@ server <- function(input, output, session) {
       }
     }
     
-    p <- ggplot(demand_selected, aes(x = year, y = .data[[y_col]])) +
+    p <- 
+      ggplot(demand_selected, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$blue) +
       geom_point(size = 2.5, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),
@@ -849,7 +870,7 @@ server <- function(input, output, session) {
     if (nrow(plot_df) == 0) return(NULL)
     
     title_txt <- paste(
-      "Education requirement share by occupation —",
+      "Top AIREA Occupations —",
       gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label))
     )
     
@@ -863,15 +884,17 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::percent) +
         labs(
           x = NULL,
-          y = "Share of job postings",
-          fill = "Education requirement",
+          y = "Share of Job Postings",
+          fill = "Education Requirement",
           title = title_txt
         ) +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         ) +
         scale_fill_manual(values = ccrc_palette) +
@@ -883,15 +906,17 @@ server <- function(input, output, session) {
         scale_y_continuous(labels = scales::comma) +
         labs(
           x = NULL,
-          y = "Number of job postings",
-          fill = "Education requirement",
+          y = "Number of Job Postings",
+          fill = "Education Requirement",
           title = title_txt
         ) +
         ccrc_theme +
+        scale_y_continuous(position = "right") +
+        scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
-          legend.justification = "center",
-          legend.box.just = "center",
+          legend.justification = "left",
+          legend.box.just = "left",
           legend.box = "horizontal"
         ) +
         scale_fill_manual(values = ccrc_palette) +
