@@ -175,7 +175,6 @@ navbarPage(
                     
                     div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      
                       p("Which areas of the country have strong job demand in AIREA fields? Which community colleges confer a large percentage of their credentials in AIREA fields?", 
                         icon("hand-point-up"),
                         "Use the controls to filter by year or to search for an institution.",
@@ -313,7 +312,7 @@ navbarPage(
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                         choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
                         selected = "airea",
-                        inline = TRUE
+                        inline = FALSE
                       )
                     ),
                     br(),
@@ -340,7 +339,15 @@ navbarPage(
                           "Number of Credentials by Program" = "single"
                         ),
                         selected = "filled",
-                        inline = TRUE
+                        inline = FALSE
+                      ),
+                      br(),
+                      selectInput(
+                        inputId = "supply_bar_year",
+                        label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        choices = c("Overall", 2010:2023),
+                        selected = 2023,
+                        width = "60%"
                       )
                     ),
                     br(),
@@ -432,14 +439,14 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       radioButtons(
                         inputId = "demand_metric",
-                        label = NULL,
+                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                         choices = c(
                           "Number of AIREA Job Postings" = "airea",
                           "AIREA % of All Postings" = "pct",
                           "AIREA Postings per 100,000" = "per100k"
                         ),
                         selected = "airea",
-                        inline = TRUE
+                        inline = FALSE
                       )
                     ),
                     
@@ -458,26 +465,37 @@ navbarPage(
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
-                      numericInput(
-                        inputId = "num_socs",
-                        label = "Number of Occupations (1–40) to Display:",
-                        value = 10,
-                        min = 1,
-                        max = 40,
-                        step = 1,
-                        width = "60%"
-                      ),
-                      br(),
+                      
                       radioButtons(
                         inputId = "demand_bar_style",
-                        label = NULL,
+                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
                         choices = c(
                           "Share of Job Postings" = "filled",
                           "Number of Job Postings" = "single"
                         ),
                         selected = "single",
-                        inline = TRUE
-                      )
+                        inline = FALSE,
+                        width = "60%"
+                      ),
+                      br(),
+                      numericInput(
+                        inputId = "num_socs",
+                        label = span("Number of Occupations to Display:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        value = 10,
+                        min = 1,
+                        max = 30,
+                        step = 1,
+                        width = "60%"
+                      ),
+                      br(),
+                      selectInput(
+                        inputId = "demand_bar_year",
+                        label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        choices = c("Overall", 2010:2023),
+                        selected = 2023,
+                        width = "60%"
+                      ),
+                      br()
                     ),
                     
                     br(),
