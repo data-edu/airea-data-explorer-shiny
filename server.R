@@ -11,6 +11,7 @@ library(scales)
 library(ggplot2)
 library(plotly)
 library(DT)
+library(ggiraph)
 
 # NEW: DuckDB + DBI
 library(DBI)
@@ -79,6 +80,9 @@ cz_table_df <- read_csv("data/cz-summary-table.csv")
 # Precomputed CZ leaders (optional)
 leaders_cz <- tryCatch(read_csv("data/leaders_cz.csv", show_col_types = FALSE), error = function(e) NULL)
 
+
+
+
 # ==============================================================================
 # App color palette and plot theme (match CSS)
 # ==============================================================================
@@ -120,7 +124,6 @@ ccrc_theme <-
     panel.grid.minor = element_blank(),
     panel.grid.major = element_line(color = "#e8f5e8")
   )
-
 
 
 
@@ -344,7 +347,7 @@ server <- function(input, output, session) {
   )
   
   # Institution time series plot (DuckDB)
-  output$supply_degrees_by_institution <- renderPlot({
+  output$supply_degrees_by_institution <- renderGirafe({
     validate(need(!is.null(selected_institution()), "Select an institution above to view trends."))
     
     my_inst <- selected_institution()
@@ -380,7 +383,12 @@ server <- function(input, output, session) {
       mutate(
         airea_pct = ifelse(total_completions > 0,
                            (total_airea_completions / total_completions) * 100,
-                           NA_real_)
+                           NA_real_),
+        tooltip = if (metric == "pct") {
+          paste0("Year: ", year, "\nAIREA %: ", round(airea_pct, 1), "%")
+        } else {
+          paste0("Year: ", year, "\nAIREA Credentials: ", scales::comma(total_airea_completions))
+        }
       )
     
     y_col <- if (metric == "pct") "airea_pct" else "total_airea_completions"
@@ -397,7 +405,7 @@ server <- function(input, output, session) {
     p <- 
       ggplot(plot_df, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$teal) +
-      geom_point(size = 2.5, color = ccrc_colors$purple) +
+      geom_point_interactive(aes(tooltip = tooltip), size = 3, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),
                 inherit.aes = FALSE, linewidth = 1, linetype = "dashed", color = ccrc_colors$orange) +
       ccrc_theme +
@@ -415,11 +423,11 @@ server <- function(input, output, session) {
       p <- p + scale_y_continuous(labels = scales::comma)
     }
     
-    p
+    girafe(ggobj = p, height_svg = 6, width_svg = 10)
   })
   
   # CIP by award level stacked bar (most recent year for selected institution) using DuckDB
-  output$supply_cip_award_bar <- renderPlot({
+  output$supply_cip_award_bar <- renderGirafe({
     validate(need(!is.null(selected_institution()), "Select an institution above to view credentials awarded by CIP."))
     
     my_inst <- selected_institution()
@@ -441,7 +449,8 @@ server <- function(input, output, session) {
       filter(total_airea_completions > 0) %>%
       mutate(
         award_level = label_to_factor(award_level),
-        award_level = forcats::fct_rev(award_level)
+        award_level = forcats::fct_rev(award_level),
+        tooltip = paste0("Program: ", ciptitle, "\nAward Level: ", award_level, "\nCredentials: ", scales::comma(total_airea_completions))
       )
     if (nrow(plot_df) == 0) return(NULL)
     
@@ -450,10 +459,10 @@ server <- function(input, output, session) {
     
     
     if (bar_style == "filled") {
-      ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
+      p <- ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
                           y = total_airea_completions,
                           fill = award_level)) +
-        geom_col(position = "fill") +
+        geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
         coord_flip() +
         ccrc_theme +
         scale_y_continuous(position = "right") +
@@ -471,11 +480,12 @@ server <- function(input, output, session) {
           legend.box.just = "left",
           legend.box = "horizontal"
         )
+      girafe(ggobj = p, height_svg = 7, width_svg = 12)
     } else {
-      ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
+      p <- ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
                           y = total_airea_completions,
                           fill = award_level)) +
-        geom_col(position = "stack") +
+        geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
         coord_flip() +
         ccrc_theme +
         scale_x_discrete(position = "top") +
@@ -493,13 +503,13 @@ server <- function(input, output, session) {
           legend.box.just = "left",
           legend.box = "horizontal"
         )
+      girafe(ggobj = p, height_svg = 7, width_svg = 12)
     }
   })
   
   # ============================================================================
   # Panel 3: Job Postings
   # ============================================================================
-  
   
   
   # Populate and react to CZ search (Tab 3)
@@ -645,32 +655,32 @@ server <- function(input, output, session) {
     filename = function() paste0("airea_cz_job_postings_", Sys.Date(), ".csv"),
     content = function(file) {
       df <- cz_table_df
-        lower_names <- tolower(names(df))
-        label_idx <- match(c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel"), lower_names)
-        label_idx <- label_idx[!is.na(label_idx)]
-        if (length(label_idx) > 0) {
-          first_col <- label_idx[1]
-          df <- df[, c(first_col, setdiff(seq_len(ncol(df)), first_col)), drop = FALSE]
-          names(df)[1] <- "Commuting Zone"
-        }
-        # Convert percent columns to 0-100
-        pct_idx <- match(c("airea %", "airea%", "pct_airea", "pct_airea_posts", "airea pct", "airea_percentage"), lower_names)
-        pct_idx <- pct_idx[!is.na(pct_idx)]
-        if (length(pct_idx) > 0) {
-          for (i in pct_idx) {
-            nm <- names(cz_table_df)[i]
-            if (nm %in% names(df) && is.numeric(df[[nm]])) {
-              vals <- df[[nm]]
-              df[[nm]] <- ifelse(is.na(vals), NA, ifelse(vals <= 1, vals * 100, vals))
-            }
+      lower_names <- tolower(names(df))
+      label_idx <- match(c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel"), lower_names)
+      label_idx <- label_idx[!is.na(label_idx)]
+      if (length(label_idx) > 0) {
+        first_col <- label_idx[1]
+        df <- df[, c(first_col, setdiff(seq_len(ncol(df)), first_col)), drop = FALSE]
+        names(df)[1] <- "Commuting Zone"
+      }
+      # Convert percent columns to 0-100
+      pct_idx <- match(c("airea %", "airea%", "pct_airea", "pct_airea_posts", "airea pct", "airea_percentage"), lower_names)
+      pct_idx <- pct_idx[!is.na(pct_idx)]
+      if (length(pct_idx) > 0) {
+        for (i in pct_idx) {
+          nm <- names(cz_table_df)[i]
+          if (nm %in% names(df) && is.numeric(df[[nm]])) {
+            vals <- df[[nm]]
+            df[[nm]] <- ifelse(is.na(vals), NA, ifelse(vals <= 1, vals * 100, vals))
           }
         }
-        readr::write_csv(df, file)
+      }
+      readr::write_csv(df, file)
     }
   )
   
   # CZ time series plot (with metric toggle) using DuckDB
-  output$demand_cz_trend <- renderPlot({
+  output$demand_cz_trend <- renderGirafe({
     validate(need(!is.null(selected_cz()), "Select a commuting zone above to view trends."))
     
     my_cz <- selected_cz()
@@ -706,6 +716,16 @@ server <- function(input, output, session) {
                       pct = "AIREA job posts (%)",
                       per100k = "AIREA job posts per 100,000")
     title_txt <- paste("AIREA Job Posts Over Time —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
+    
+    # Add tooltip
+    demand_selected <- demand_selected %>%
+      mutate(
+        tooltip = switch(metric,
+          airea = paste0("Year: ", year, "\nAIREA Posts: ", scales::comma(posts_airea)),
+          pct = paste0("Year: ", year, "\nAIREA %: ", round(airea_pct, 1), "%"),
+          per100k = paste0("Year: ", year, "\nPer 100k: ", scales::comma(round(posts_per_100k)))
+        )
+      )
     
     # National averages mapped to metric (unchanged logic)
     nat_min <- suppressWarnings(min(demand_selected$year, na.rm = TRUE))
@@ -748,7 +768,7 @@ server <- function(input, output, session) {
     p <- 
       ggplot(demand_selected, aes(x = year, y = .data[[y_col]])) +
       geom_line(linewidth = 1.2, color = ccrc_colors$blue) +
-      geom_point(size = 2.5, color = ccrc_colors$purple) +
+      geom_point_interactive(aes(tooltip = tooltip), size = 3, color = ccrc_colors$purple) +
       geom_line(data = nat_df, aes(x = year, y = nat_value),
                 inherit.aes = FALSE, linewidth = 1, linetype = "dashed", color = ccrc_colors$orange) +
       ccrc_theme +
@@ -763,7 +783,7 @@ server <- function(input, output, session) {
     else if (metric == "pct") { p <- p + scale_y_continuous(labels = function(x) paste0(x, "%")) }
     else if (metric == "per100k") { p <- p + scale_y_continuous(labels = scales::comma) }
     
-    p
+    girafe(ggobj = p, height_svg = 6, width_svg = 10)
   })
   
   # Build plot data once for reuse (also drives dynamic height)
@@ -797,7 +817,7 @@ server <- function(input, output, session) {
       mutate(soc_title = forcats::fct_reorder(soc_title, total_soc))
   })
 
-  output$demand_soc_edreq_bar <- renderPlot({
+  output$demand_soc_edreq_bar <- renderGirafe({
     req(selected_cz())
     my_cz <- selected_cz()
     year_choice <- input$demand_bar_year
@@ -811,9 +831,21 @@ server <- function(input, output, session) {
     validate(need(nrow(plot_df) > 0, "No data for selection"))
     bar_style <- input$demand_bar_style
     if (is.null(bar_style)) bar_style <- "single"
+    
+    # Add tooltips
+    plot_df <- plot_df %>%
+      mutate(
+        tooltip = paste0("Occupation: ", soc_title, "\nEducation: ", ed_req, "\nPostings: ", scales::comma(total_postings))
+      )
+    
+    # Dynamic height based on number of bars
+    base <- 3
+    height_per_bar <- 0.4
+    h <- max(6, base + height_per_bar * length(unique(plot_df$soc_title)))
+    
     if (bar_style == "filled") {
-      ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col(position = "fill") +
+      p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
+        geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
         coord_flip() +
         scale_y_continuous(labels = scales::percent) +
         labs(
@@ -833,9 +865,10 @@ server <- function(input, output, session) {
         ) +
         scale_fill_manual(values = ccrc_palette) +
         guides(fill = guide_legend(nrow = 3, byrow = TRUE))
+      girafe(ggobj = p, height_svg = h, width_svg = 12)
     } else {
-      ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col(position = "stack") +
+      p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
+        geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
         coord_flip() +
         scale_y_continuous(labels = scales::comma) +
         labs(
@@ -855,12 +888,7 @@ server <- function(input, output, session) {
         ) +
         scale_fill_manual(values = ccrc_palette) +
         guides(fill = guide_legend(nrow = 3, byrow = TRUE))
+      girafe(ggobj = p, height_svg = h, width_svg = 12)
     }
-  }, height = function() {
-    df <- demand_soc_df()
-    base <- 120
-    px_per_bar <- 26
-    n_bars <- length(unique(df$soc_title))
-    max(450, base + px_per_bar * n_bars)
   })
 }
