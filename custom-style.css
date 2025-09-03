@@ -44,7 +44,7 @@ input[type="number"] {
 
 /* Adjust menu positioning */
 .navbar-nav {
-  margin-top: 20px !important;  /* Push menu down to center vertically */
+  margin-top: 60px !important;  /* Push menu down to center vertically */
   margin-left: -20px !important;
 }
 
@@ -299,4 +299,14 @@ hr80 {
 
 .mapbox-container {
   background-color: #f2f8f2 !important;
+}
+
+
+
+/* ========================================================================== */
+/* Style the collapsible boxes */
+/* ========================================================================== */
+
+#collapse_panel .panel-heading {
+  background-color: #f2f8f2;  /* light green */
 }

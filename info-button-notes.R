@@ -1,0 +1,83 @@
+################################################################################
+### Load Packages
+################################################################################
+
+library(tidyverse)
+library(shinyBS)
+
+
+
+################################################################################
+### Info button notes for Shiny app
+### Store all popover content in a named list
+################################################################################
+
+
+# Helper function to create info buttons with popovers
+create_info_button <- 
+  function(id, label_name) {
+    tagList(
+      bsButton(id, 
+               label = label_name, 
+               icon = icon("info", lib = "font-awesome"), 
+               size = "extra-small"),
+      do.call(bsPopover, c(list(id = id), info_notes[[id]]))
+    )
+  }
+
+info_notes <- 
+  list(
+    
+    
+    ############################################################################
+    map_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Explore the number and share of AIREA job postings by year in each of the nation's commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    credentials_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "See a list of the community colleges that award the most credentials in AIREA fields. Select an individual college for more detail on the types of AIREA credentials by award level and trends over time."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    jobs_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Find the commuting zones with the most AIREA job postings. Select an individual commuting zone for more detail on the top AIREA occupations and trends over time."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    about_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Learn more about what jobs and credentials are included in the AIREA Data Explorer and as well as the data sources for this analysis."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    NULL
+  )
+    
