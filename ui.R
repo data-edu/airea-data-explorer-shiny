@@ -6,6 +6,7 @@ library(shiny)                 # Shiny framework for interactive web application
 library(plotly)                # For interactive plotting
 source("mapboxtoken_setup.R")  # Loads Mapbox_token used for Mapbox access
 library(shinyBS)               # For interactive info buttons
+library(ggiraph)
 
 
 
@@ -16,7 +17,6 @@ library(shinyBS)               # For interactive info buttons
 navbarPage(
   id = "tabs",
 
-  
     
   # ============================================================================
   # CSS for styling
@@ -70,7 +70,7 @@ navbarPage(
         id = "map_info",
         title = "More Information",
         content = HTML(paste0(
-          "Explore the number and share of AIREA job postings by year in each of the nation’s commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
+          "Explore the number and share of AIREA job postings by year in each of the nation's commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
         )),
         placement = "right",
         trigger = "hover",
@@ -182,7 +182,7 @@ navbarPage(
                         br(),
                         "Curious to see AIREA job postings represented in different ways? ",
                         icon("hand-point-up"),
-                        "Use the “Color By” filter to see the raw number of AIREA job postings, the percent of all job postings that are in AIREA fields, or the number of AIREA job postings per 1000 residents."
+                        "Use the color by filter to see the raw number of AIREA job postings, the percent of all job postings that are in AIREA fields, or the number of AIREA job postings per 1000 residents."
                       )
                       
                     ),
@@ -305,7 +305,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    plotOutput("supply_degrees_by_institution", height = "400px"),
+                    girafeOutput("supply_degrees_by_institution", height = "400px"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
@@ -329,11 +329,10 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
+                    girafeOutput("supply_cip_award_bar", height = "500px"),
+                    br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
-                      br(),
-                      plotOutput("supply_cip_award_bar", height = "500px"),
-                      br(),
                       radioButtons(
                         inputId = "supply_bar_style",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
@@ -436,7 +435,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    plotOutput("demand_cz_trend", height = "400px"),
+                    girafeOutput("demand_cz_trend", height = "400px"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
@@ -463,12 +462,11 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
+                    girafeOutput("demand_soc_edreq_bar", height = "600px"),
+                    br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
                       
-                      br(),
-                      plotOutput("demand_soc_edreq_bar", height = "500px"),
-                      br(),
                       radioButtons(
                         inputId = "demand_bar_style",
                         label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
@@ -531,7 +529,7 @@ navbarPage(
              column(12,
                     div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      p("The AIERA Data Explorer’s interactive maps and data visualizations show how community college AIREA program completions align with nearby job postings by commuting zone.")
+                      p("The AIERA Data Explorer's interactive maps and data visualizations show how community college AIREA program completions align with nearby job postings by commuting zone.")
                     ),
                     div(
                       style = "background-color: #ffffff; padding: 20px; border-radius: 6px;",
@@ -553,7 +551,7 @@ navbarPage(
                             " framework advanced by ",
                             tags$a(href="https://www.onetonline.org/", 
                                    "O*NET"),
-                            ". This framework highlights occupations connected to the green economy, organized by the Bureau of Labor Statistics’ ",
+                            ". This framework highlights occupations connected to the green economy, organized by the Bureau of Labor Statistics' ",
                             tags$a(href="https://www.bls.gov/soc/", 
                                    tags$em("Standard Occupational Classification")),
                             " (SOC) codes. These occupations span a wide range of industries",
@@ -561,7 +559,7 @@ navbarPage(
                             "from renewable energy and environmental protection to construction, agriculture, and advanced manufacturing."),
                           
                           br(),
-                          p("However, a narrow focus on “green jobs” misses critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."),
+                          p("However, a narrow focus on green jobs misses critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."),
                           
                           br(),
                           p("Hewing exclusively to the O*NET framework meant excluding a swath of critical high-wage, high-opportunity degree programs in construction trades, precision production, and engineering. We mapped these programs to related occupations using the ",
@@ -579,12 +577,12 @@ navbarPage(
                           p("Download the complete list of AIREA occupations and corresponding programs of study here."),
                           
                           br(),
-                          p("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. AIREA jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor’s degree or higher, as well as for those requiring less than a bachelor’s degree. In fact, our analysis of wage data from the Bureau of Labor Statistics’ Occupation, Employment and Wage Statistics program shows that middle-skills workers in AIREA jobs earn about 30.6 percent more annually ($61,011 vs. $46,710) than equivalently skilled workers in non-AIREA roles."),
+                          p("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. AIREA jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor's degree or higher, as well as for those requiring less than a bachelor's degree. In fact, our analysis of wage data from the Bureau of Labor Statistics' Occupation, Employment and Wage Statistics program shows that middle-skills workers in AIREA jobs earn about 30.6 percent more annually ($61,011 vs. $46,710) than equivalently skilled workers in non-AIREA roles."),
                           
                           br(),
                           p("To identify the demand for workers in AIREA fields, we used 2010-2023 job postings data from ",
                             tags$a(href="https://lightcast.io/", "Lightcast"),
-                            ", the nation’s largest source of proprietary economic and workforce data. Lightcast provides job postings data for every SOC code, with geographic detail down to the county level.")
+                            ", the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every SOC code, with geographic detail down to the county level.")
                         )
                       ),
                       
@@ -596,7 +594,7 @@ navbarPage(
                         bsCollapsePanel(
                           title = h4("What are AIREA Credentials?"),
                           value = "qa2",
-                          p("For AIREA credentials, we used the U.S. Department of Education’s ",
+                          p("For AIREA credentials, we used the U.S. Department of Education's ",
                             tags$a(href="https://nces.ed.gov/ipeds", 
                                    "Integrated Postsecondary Education Data System (IPEDS)"), 
                             " degree completions and institutional directory files covering the years 2010-2023. Building from the 283 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"),
@@ -699,18 +697,18 @@ navbarPage(
                     )
              )
            ),
-           br(),
-           fluidRow(
-             column(12,
-                    tags$div(
-                      style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:60%; margin-left:auto; margin-right:auto;",
-                      tags$h4("Research Data Access"),
-                      p(
-                        "Researchers and analysts can access underlying datasets via our OSF repository:",
-                        tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
-                      )
-                    )
-             )
-           )
+          br(),
+          fluidRow(
+            column(12,
+                   tags$div(
+                     style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:60%; margin-left:auto; margin-right:auto;",
+                     tags$h4("Research Data Access"),
+                     p(
+                       "Researchers and analysts can access underlying datasets via our OSF repository:",
+                       tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
+                     )
+                   )
+            )
+          )
   )
 )
