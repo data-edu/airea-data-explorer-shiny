@@ -8,6 +8,8 @@ source("mapboxtoken_setup.R")  # Loads Mapbox_token used for Mapbox access
 library(shinyBS)               # For interactive info buttons
 library(ggiraph)
 
+source("info-button-notes.R")
+
 
 
 # ==============================================================================
@@ -48,7 +50,7 @@ navbarPage(
       h1(img(src = "logo-airea.png", height = "60px"),
          br(),
          div(style = "height: 10px;"),
-         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer",
+         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"
          )
     ),
   
@@ -64,55 +66,8 @@ navbarPage(
     div(
       class = "app-header",
       p(tags$em("These interactive maps and data visualizations are for exploring how community college green program completions align with AIREA-sector job postings by commuting zone.")),
-      hr(),
-         
-
-            
-      ### Write out the text that appears when hovering over the info buttons
-      bsPopover(
-        id = "map_info",
-        title = "More Information",
-        content = HTML(paste0(
-          "Explore the number and share of AIREA job postings by year in each of the nation's commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
-        )),
-        placement = "right",
-        trigger = "hover",
-        options = list(container = "body")
-      ),
       
-      bsPopover(
-        id = "credentials_info",
-        title = "More Information",
-        content = HTML(paste0(
-          "See a list of the community colleges that award the most credentials in AIREA fields. Select an individual college for more detail on the types of AIREA credentials by award level and trends over time."
-        )),
-        placement = "right",
-        trigger = "hover",
-        options = list(container = "body")
-      ),
-      
-      bsPopover(
-        id = "jobs_info",
-        title = "More Information",
-        content = HTML(paste0(
-          "Find the commuting zones with the most AIREA job postings. Select an individual commuting zone for more detail on the top AIREA occupations and trends over time."
-        )),
-        placement = "right",
-        trigger = "hover",
-        options = list(container = "body")
-      ),
-      
-      bsPopover(
-        id = "about_info",
-        title = "More Information",
-        content = HTML(paste0(
-          "Learn more about what jobs and credentials are included in the AIREA Data Explorer and as well as the data sources for this analysis."
-        )),
-        placement = "right",
-        trigger = "hover",
-        options = list(container = "body")
-      )
-      
+      hr()
     ),
     
   
@@ -162,12 +117,7 @@ navbarPage(
   tabPanel(title = 
              div(
                "Map",
-               bsButton("map_info", 
-                        label = "", 
-                        icon = icon("info", 
-                                    lib = "font-awesome"), 
-                        size = "extra-small"
-               )
+               create_info_button("map_info", "")
              ),
            value = "mainmap",
            
@@ -204,11 +154,11 @@ navbarPage(
                          left = 40,
                          width = 360, height = "auto",
                          
-                                                 selectInput("selected_year_map",
-                                    tags$div(style = "margin-top: 15px;", tags$h3("Select Year:")),
-                                    choices = rev(2010:2023),
-                                    selected = 2023
-                        ),
+                         selectInput("selected_year_map",
+                                     div(style = "margin-top: 15px;", h3("Select Year:")),
+                                     choices = rev(2010:2023),
+                                     selected = 2023
+                         ),
                          selectInput("cz_metric", 
                                      tags$h3("Color By:"), 
                                      choices = c(
@@ -245,14 +195,10 @@ navbarPage(
   tabPanel(title =
              div(
                "Credentials Awarded", 
-               bsButton("credentials_info", 
-                        label = "", 
-                        icon = icon("info", 
-                                    lib = "font-awesome"), 
-                        size = "extra-small"
-               )
+               create_info_button("credentials_info", "")
              ),
            value = "treemap",
+           
            
            h2("Credentials Awarded at Community Colleges in AIREA Fields"),
            
@@ -268,31 +214,53 @@ navbarPage(
                         icon("hand-point-up"),
                         "Search for a community college to see its top AIREA programs and trends over time in the visualizations below."
                       ),
-                      br(),
-                      div(
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
-                        selectizeInput(
-                          inputId = "supply_search",
-                          label   = span("Search Institution:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
-                          choices = NULL,
-                          options = list(placeholder = 'Search institution...', create = FALSE),
-                          width   = "100%"   # fills the 80% container
-                        )
-                      ),
                       
                       br(),
-                      div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end; margin-top:10px;",
-                        selectInput(
-                          inputId = "supply_leader_airea",
-                          label = "Top 50 colleges by total AIREA credentials (mean per year):",
-                          choices = NULL,
-                          width = "40%"
-                        ),
-                        selectInput(
-                          inputId = "supply_leader_pct",
-                          label = "Top 50 colleges by AIREA % of credentials (mean per year):",
-                          choices = NULL,
-                          width = "40%"
+                      
+                      
+                      
+                      div(
+                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
+                        
+                        h3("Search By:", style = "text-align: center;"),
+                        br(),
+                        
+                        div(
+                          style = "display: flex; align-items: start; gap: 10px; flex-wrap: wrap;",
+                          
+                          div(
+                            style = "flex: 1; min-width: 200px; max-width: 32%;",
+                            selectizeInput(
+                              inputId = "supply_search",
+                              label = tags$strong("All institutions"),
+                              choices = NULL,
+                              options = list(placeholder = 'Search institution...', create = FALSE)
+                            )
+                          ),
+                          div(
+                            style = "margin-top: 20px; font-weight: bold;",
+                            "or"
+                          ),
+                          div(
+                            style = "flex: 1; min-width: 200px; max-width: 32%;",
+                            selectInput(
+                              inputId = "supply_leader_airea",
+                              label = tags$strong("Top 50 colleges by total AIREA credentials (mean per year)"),
+                              choices = NULL
+                            )
+                          ),
+                          div(
+                            style = "margin-top: 20px; font-weight: bold;",
+                            "or"
+                          ),
+                          div(
+                            style = "flex: 1; min-width: 200px max-width: 32%;",
+                            selectInput(
+                              inputId = "supply_leader_pct",
+                              label = tags$strong("Top 50 colleges by AIREA % of credentials (mean per year)"),
+                              choices = NULL
+                            )
+                          )
                         )
                       )
                       
@@ -370,15 +338,11 @@ navbarPage(
   
   tabPanel(title = 
              div(
-               "Job Postings", 
-               bsButton("jobs_info", 
-                        label = "", 
-                        icon = icon("info", 
-                                    lib = "font-awesome"), 
-                        size = "extra-small"
-               )
+               "Job Postings",
+               create_info_button("jobs_info", "")
              ),
            value = "demand", 
+           
            
            h2("AIREA Job Postings by Commuting Zone"),
            
@@ -395,38 +359,65 @@ navbarPage(
                         ),
                       
                       br(),
-                      div(
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
-                        selectizeInput(
-                          inputId = "cz_search",
-                          label   = tags$span("Search Commuting Zone", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
-                          choices = NULL,
-                          options = list(placeholder = 'Search Commuting Zone...', create = FALSE),
-                          width   = "100%"   # fills the 80% container
-                        )
-                      ),
                       
-                      br(),
-                        div(style = "display:flex; gap:10px; justify-content:center; align-items:flex-end;",
-                          selectInput(
-                            inputId = "cz_leader_posts",
-                            label = "Top 50 zones by total AIREA postings (mean per year)",
-                            choices = NULL,
-                            width = "30%"
+                      
+                      
+                      div(
+                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
+                        
+                        h3("Search By:", style = "text-align: center;"),
+                        br(),
+                        
+                        div(
+                          style = "display: flex; align-items: start; gap: 10px; flex-wrap: wrap;",
+                          
+                          div(
+                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            selectizeInput(
+                              inputId = "cz_search",
+                              label = tags$strong("Commuting zone"),
+                              choices = NULL,
+                              options = list(placeholder = 'Search commuting zone...', create = FALSE),
+                            )
                           ),
-                          selectInput(
-                            inputId = "cz_leader_pct",
-                            label = "Top 50 zones by AIREA % of all postings (mean per year)",
-                            choices = NULL,
-                            width = "30%"
+                          div(
+                            style = "margin-top: 20px; font-weight: bold;",
+                            "or"
                           ),
-                          selectInput(
-                            inputId = "cz_leader_per1000",
-                            label = "Top 50 zones by AIREA postings per 1,000 residents (mean per year)",
-                            choices = NULL,
-                            width = "30%"
+                          div(
+                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            selectInput(
+                              inputId = "cz_leader_posts",
+                              label = tags$strong("Top 50 zones by total AIREA postings (mean per year)"),
+                              choices = NULL
+                            )
+                          ),
+                          div(
+                            style = "margin-top: 20px; font-weight: bold;",
+                            "or"
+                          ),
+                          div(
+                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            selectInput(
+                              inputId = "cz_leader_pct",
+                              label = tags$strong("Top 50 zones by AIREA % of all postings (mean per year)"),
+                              choices = NULL
+                            )
+                          ),
+                          div(
+                            style = "margin-top: 20px; font-weight: bold;",
+                            "or"
+                          ),
+                          div(
+                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            selectInput(
+                              inputId = "cz_leader_per1000",
+                              label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents (mean per year)"),
+                              choices = NULL
+                            )
                           )
                         )
+                      )
                       
                     )
              )
@@ -517,14 +508,10 @@ navbarPage(
   tabPanel(title =
              div(
                "About the Data Explorer",
-               bsButton("about_info", 
-                        label = "", 
-                        icon = icon("info", 
-                                    lib = "font-awesome"), 
-                        size = "extra-small"
-               )
+               create_info_button("about_info", "")
              ),
            value = "about",
+           
            
            h2("About the AIREA Data Explorer"),
            
