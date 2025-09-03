@@ -47,7 +47,9 @@ navbarPage(
       div(style = "height: 40px;"),
       h1(img(src = "logo-airea.png", height = "60px"),
          br(),
-         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer")
+         div(style = "height: 10px;"),
+         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer",
+         )
     ),
   
   
