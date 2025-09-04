@@ -390,7 +390,7 @@ server <- function(input, output, session) {
       inst_col <- name_map[inst_idx[1]]
       updateSelectizeInput(
         session, "supply_search",
-        choices = sort(unique(as.character(supply_table_df[[inst_col]]))), server = TRUE
+        choices = sort(unique(as.character(supply_table_df[[inst_col]]))), server = TRUE, selected = character(0)
       )
       
       leaders_airea <- if (!is.null(leaders_supply_airea)) {
@@ -404,7 +404,8 @@ server <- function(input, output, session) {
           mutate(label = paste0(instnm, " — ", scales::comma(round(mean_airea_completions))))
       }
       updateSelectInput(session, "supply_leader_airea",
-                        choices = setNames(leaders_airea$instnm, leaders_airea$label))
+                        choices = setNames(leaders_airea$instnm, leaders_airea$label),
+                        selected = character(0))
       
       leaders_pct <- if (!is.null(leaders_supply_pct)) {
         leaders_supply_pct %>%
@@ -417,7 +418,8 @@ server <- function(input, output, session) {
           mutate(label = paste0(instnm, " — ", round(pct_airea_completions * 100, 1), "%"))
       }
       updateSelectInput(session, "supply_leader_pct",
-                        choices = setNames(leaders_pct$instnm, leaders_pct$label))
+                        choices = setNames(leaders_pct$instnm, leaders_pct$label),
+                        selected = character(0))
   })
   
   # Sync institution selection from any control into a single reactiveVal
@@ -708,7 +710,7 @@ server <- function(input, output, session) {
         label_col <- name_map[match_idx[1]]
         updateSelectizeInput(
           session, "cz_search",
-          choices = sort(unique(as.character(cz_table_df[[label_col]]))), server = TRUE
+          choices = sort(unique(as.character(cz_table_df[[label_col]]))), server = TRUE, selected = character(0)
         )
         
         # Build leader lists from precomputed CSV
@@ -718,17 +720,17 @@ server <- function(input, output, session) {
           arrange(desc(mean_airea_posts)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", scales::comma(round(mean_airea_posts))))
         updateSelectInput(session, "cz_leader_posts",
-                          choices = setNames(as.character(leaders_posts$cz_label), leaders_posts$label))
+                          choices = setNames(as.character(leaders_posts$cz_label), leaders_posts$label), selected = character(0))
         leaders_pct <- leaders %>%
           arrange(desc(mean_pct)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", round(mean_pct * 100, 1), "%"))
         updateSelectInput(session, "cz_leader_pct",
-                          choices = setNames(as.character(leaders_pct$cz_label), leaders_pct$label))
+                          choices = setNames(as.character(leaders_pct$cz_label), leaders_pct$label), selected = character(0))
         leaders_per1k <- leaders %>%
           arrange(desc(mean_per1000)) %>% slice_head(n = 150) %>%
           mutate(label = paste0(prettify_cz(cz_label), " — ", scales::comma_format(accuracy = 0.1)(mean_per1000)))
         updateSelectInput(session, "cz_leader_per1000",
-                          choices = setNames(as.character(leaders_per1k$cz_label), leaders_per1k$label))
+                          choices = setNames(as.character(leaders_per1k$cz_label), leaders_per1k$label), selected = character(0))
       }
   })
   
