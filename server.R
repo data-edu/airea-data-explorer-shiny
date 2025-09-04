@@ -28,6 +28,65 @@ label_to_factor <- function(x) {
   }
 }
 
+# CIP Group mapping (by first two digits of CIP code)
+get_cip_group <- function(cip_code) {
+  code_chr <- gsub("[^0-9]", "", as.character(cip_code))
+  # Vectorized handling: derive two-digit prefixes, NA if empty
+  prefix <- substr(stringr::str_pad(code_chr, 2, pad = "0"), 1, 2)
+  prefix[nchar(code_chr) == 0 | is.na(code_chr)] <- NA_character_
+  groups <- c(
+    "01" = "Agriculture, Agriculture Operations, and Related Sciences",
+    "03" = "Natural Resources and Conservation",
+    "04" = "Architecture and Related Services",
+    "05" = "Area, Ethnic, Cultural, and Gender Studies",
+    "09" = "Communication, Journalism, and Related Programs",
+    "10" = "Communications Technologies/Technicians and Support Services",
+    "11" = "Computer and Information Sciences and Support Services",
+    "12" = "Personal and Culinary Services",
+    "13" = "Education",
+    "14" = "Engineering",
+    "15" = "Engineering Technologies/Technicians",
+    "16" = "Foreign Languages, Literatures, and Linguistics",
+    "19" = "Family and Consumer Sciences/Human Sciences",
+    "22" = "Legal Professions and Studies",
+    "23" = "English Language and Literature/Letters",
+    "24" = "Liberal Arts and Sciences, General Studies and Humanities",
+    "25" = "Library Science",
+    "26" = "Biological and Biomedical Sciences",
+    "27" = "Mathematics and Statistics",
+    "28" = "Reserve Officer Training Corps (JROTC, ROTC)",
+    "29" = "Military Technologies",
+    "30" = "Multi/Interdisciplinary Studies",
+    "31" = "Parks, Recreation, Leisure, and Fitness Studies",
+    "32" = "Basic Skills",
+    "33" = "Citizenship Activities",
+    "34" = "Health-Related Knowledge and Skills",
+    "35" = "Interpersonal and Social Skills",
+    "36" = "Leisure and Recreational Activities",
+    "37" = "Personal Awareness and Self-Improvement",
+    "38" = "Philosophy and Religious Studies",
+    "39" = "Theology and Religious Vocations",
+    "40" = "Physical Sciences",
+    "41" = "Science Technologies/Technicians",
+    "42" = "Psychology",
+    "43" = "Security and Protective Services",
+    "44" = "Public Administration and Social Service Professions",
+    "45" = "Social Sciences",
+    "46" = "Construction Trades",
+    "47" = "Mechanic and Repair Technologies/Technicians",
+    "48" = "Precision Production",
+    "49" = "Transportation and Materials Moving",
+    "50" = "Visual and Performing Arts",
+    "51" = "Health Professions and Related Clinical Sciences",
+    "52" = "Business, Management, Marketing, and Related Support Services",
+    "53" = "High School/Secondary Diplomas and Certificates",
+    "54" = "History",
+    "60" = "Residency Programs"
+  )
+  out <- unname(groups[prefix])
+  out[is.na(out)] <- "Other"
+  out
+}
 # SOC Group mapping function
 get_soc_group <- function(soc_code) {
   # Extract the 2-digit SOC group code
@@ -110,8 +169,8 @@ utils::globalVariables(c(
   "population", "posts_per_1000", "airea_percentage", "total_job_postings",
   "mean_population", "pop_year", "posts_total", "posts_airea", "soc_title",
   "ed_req", "total_postings", "total_soc", "mean_completions", "mean_airea_completions",
-  "pct_airea_completions", "mean_students_enrolled", "rural", "tribal", "soc",
-  "soc_group", "soc_group_full", "soc_group_postings", "tooltip", "total_airea_completions", "airea_pct",
+  "pct_airea_completions", "mean_students_enrolled", "rural", "tribal", "soc", "cip",
+  "soc_group", "soc_group_full", "soc_group_postings", "cip_group", "cip_group_total", "tooltip", "total_airea_completions", "airea_pct",
   "nat_value", "posts_per_100k", "AIREA%", "AIREA%_num", "Rural", "Tribal",
   "Mean Completions (per year)", "Mean AIREA Completions (per year)", "Mean Enrollment (per year)",
   "mean_airea_posts", "mean_pct", "mean_per1000"
@@ -522,14 +581,30 @@ server <- function(input, output, session) {
       title_suffix <- paste0(" — ", yr_num)
     }
     plot_df <- base_tbl %>%
-      group_by(ciptitle, award_level) %>%
+      group_by(cip, ciptitle, award_level) %>%
       summarize(total_airea_completions = sum(airea_completions, na.rm = TRUE), .groups = "drop") %>%
       collect() %>%
       filter(total_airea_completions > 0) %>%
       mutate(
         award_level = label_to_factor(award_level),
         award_level = forcats::fct_rev(award_level),
-        tooltip = paste0("Program: ", ciptitle, "\nAward Level: ", award_level, "\nCredentials: ", scales::comma(total_airea_completions))
+        cip_group = get_cip_group(cip)
+      ) %>%
+      group_by(cip_group) %>%
+      mutate(cip_group_total = sum(total_airea_completions)) %>%
+      ungroup() %>%
+      arrange(desc(cip_group_total), desc(total_airea_completions)) %>%
+      group_by(cip_group) %>%
+      arrange(desc(total_airea_completions), .by_group = TRUE) %>%
+      ungroup() %>%
+      mutate(
+        ciptitle = factor(ciptitle, levels = rev(unique(ciptitle))),
+        tooltip = paste0(
+          "Field: ", cip_group,
+          "\nProgram: ", ciptitle,
+          "\nAward Level: ", award_level,
+          "\nCredentials: ", scales::comma(total_airea_completions)
+        )
       )
     if (nrow(plot_df) == 0) return(NULL)
     
@@ -538,9 +613,7 @@ server <- function(input, output, session) {
     
     
     if (bar_style == "filled") {
-      p <- ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
-                          y = total_airea_completions,
-                          fill = award_level)) +
+      p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
         coord_flip() +
         ccrc_theme +
@@ -557,13 +630,16 @@ server <- function(input, output, session) {
           legend.position = "top",
           legend.justification = "left",
           legend.box.just = "left",
-          legend.box = "horizontal"
-        )
-      girafe(ggobj = p, height_svg = 7, width_svg = 12)
+          legend.box = "horizontal",
+          strip.placement = "outside",
+          strip.background = element_blank(),
+          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
+          plot.margin = margin(60, 30, 10, 140)
+        ) +
+        facet_grid(cip_group ~ ., scales = "free_y", space = "free_y", switch = "y")
+      girafe(ggobj = p, height_svg = 8.5, width_svg = 16)
     } else {
-      p <- ggplot(plot_df, aes(x = reorder(ciptitle, total_airea_completions),
-                          y = total_airea_completions,
-                          fill = award_level)) +
+      p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
         coord_flip() +
         ccrc_theme +
@@ -580,9 +656,14 @@ server <- function(input, output, session) {
           legend.position = "top",
           legend.justification = "left",
           legend.box.just = "left",
-          legend.box = "horizontal"
-        )
-      girafe(ggobj = p, height_svg = 7, width_svg = 12)
+          legend.box = "horizontal",
+          strip.placement = "outside",
+          strip.background = element_blank(),
+          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
+          plot.margin = margin(60, 30, 10, 140)
+        ) +
+        facet_grid(cip_group ~ ., scales = "free_y", space = "free_y", switch = "y")
+      girafe(ggobj = p, height_svg = 8.5, width_svg = 16)
     }
   })
   
