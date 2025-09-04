@@ -609,16 +609,23 @@ server <- function(input, output, session) {
     if (nrow(plot_df) == 0) return(NULL)
     
     bar_style <- input$supply_bar_style
-    if (is.null(bar_style)) bar_style <- "filled"
+    if (is.null(bar_style)) bar_style <- "single"
     
     
+    # Dynamic height based on number of programs and groups
+    num_bars <- length(unique(plot_df$ciptitle))
+    num_groups <- length(unique(plot_df$cip_group))
+    base <- 5
+    height_per_bar <- 0.35
+    h <- max(8, base + height_per_bar * num_bars + 0.4 * num_groups)
+
     if (bar_style == "filled") {
       p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
         coord_flip() +
         ccrc_theme +
         scale_y_continuous(position = "right") +
-        scale_x_discrete(position = "top") +
+        scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
         labs(
           title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm, title_suffix),
           y = "Share of AIREA Award Types",
@@ -637,13 +644,13 @@ server <- function(input, output, session) {
           plot.margin = margin(60, 30, 10, 140)
         ) +
         facet_grid(cip_group ~ ., scales = "free_y", space = "free_y", switch = "y")
-      girafe(ggobj = p, height_svg = 8.5, width_svg = 16)
+      girafe(ggobj = p, height_svg = h, width_svg = 16)
     } else {
       p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
         coord_flip() +
         ccrc_theme +
-        scale_x_discrete(position = "top") +
+        scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
         scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
           title = paste("AIREA Credentials by CIP —", my_inst$instnm, title_suffix),
@@ -663,7 +670,7 @@ server <- function(input, output, session) {
           plot.margin = margin(60, 30, 10, 140)
         ) +
         facet_grid(cip_group ~ ., scales = "free_y", space = "free_y", switch = "y")
-      girafe(ggobj = p, height_svg = 8.5, width_svg = 16)
+      girafe(ggobj = p, height_svg = h, width_svg = 16)
     }
   })
   
