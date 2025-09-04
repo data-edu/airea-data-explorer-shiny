@@ -299,7 +299,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_degrees_by_institution", width = "100%"),
+                    girafeOutput("supply_degrees_by_institution", width = "75%"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
@@ -326,7 +326,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_cip_award_bar", width = "100%"),
+                    girafeOutput("supply_cip_award_bar", width = "75%"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
@@ -470,7 +470,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_cz_trend", width = "100%"),
+                    girafeOutput("demand_cz_trend", width = "75%"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
@@ -500,7 +500,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_soc_edreq_bar", width = "100%"),
+                    girafeOutput("demand_soc_edreq_bar", width = "75%"),
                     br(),
                     div(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
