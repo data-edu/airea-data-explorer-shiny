@@ -272,7 +272,8 @@ navbarPage(
                                                   create_info_button("supply_search_info", "")
                               ),
                               choices = NULL,
-                              options = list(placeholder = 'Search institution...', create = FALSE)
+                              selected = NULL,
+                              options = list(placeholder = 'Search institution...', create = FALSE, selectOnTab = FALSE, allowEmptyOption = TRUE, persist = FALSE)
                             )
                           ),
                           div(
@@ -283,7 +284,7 @@ navbarPage(
                             style = "flex: 1; min-width: 200px; max-width: 32%;",
                             selectInput(
                               inputId = "supply_leader_airea",
-                              label = tags$strong("Top 50 colleges by total AIREA credentials (mean per year)",
+                              label = tags$strong("Top 50 colleges by total AIREA credentials",
                                                   create_info_button("supply_leader_airea_info", "")
                               ),
                               choices = NULL
@@ -297,7 +298,7 @@ navbarPage(
                             style = "flex: 1; min-width: 200px; max-width: 32%;",
                             selectInput(
                               inputId = "supply_leader_pct",
-                              label = tags$strong("Top 50 colleges by AIREA % of credentials (mean per year)",
+                              label = tags$strong("Top 50 colleges by AIREA % of credentials",
                                                   create_info_button("supply_leader_pct_info", "")
                               ),
                               choices = NULL
@@ -430,11 +431,12 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectizeInput(
                               inputId = "cz_search",
-                              label = tags$strong("Commuting zone", 
+                              label = tags$strong("All commuting zone", 
                                                   create_info_button("cz_search_info", "")
                               ),
                               choices = NULL,
-                              options = list(placeholder = 'Search commuting zone...', create = FALSE)
+                              selected = NULL,
+                              options = list(placeholder = 'Search commuting zone...', create = FALSE, selectOnTab = FALSE)
                             )
                           ),
                           div(
@@ -445,7 +447,7 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_posts",
-                              label = tags$strong("Top 50 zones by total AIREA postings (mean per year)", 
+                              label = tags$strong("Top 50 zones by total AIREA postings", 
                                                   create_info_button("cz_leader_posts_info", "")
                               ),
                               choices = NULL
@@ -459,7 +461,7 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_pct",
-                              label = tags$strong("Top 50 zones by AIREA % of all postings (mean per year)", 
+                              label = tags$strong("Top 50 zones by AIREA % of all postings", 
                                                   create_info_button("cz_leader_pct_info", "")
                               ),
                               choices = NULL
@@ -473,7 +475,7 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_per1000",
-                              label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents (mean per year)", 
+                              label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents", 
                                                   create_info_button("cz_leader_per1000_info", "")
                               ),
                               choices = NULL
@@ -544,16 +546,23 @@ navbarPage(
                       ),
                       
                       br(),
-                      numericInput(
-                        inputId = "num_socs",
-                        label = h3("Number of Occupations to Display:", style = "margin: -15px;", 
-                                   create_info_button("num_socs_info", "")
-                        ),
-                        value = 10,
-                        min = 1,
-                        max = 30,
-                        step = 1,
-                        width = "50%"
+                      div(class = "selector-box",
+                        radioButtons(
+                          inputId = "num_socs",
+                          label = h3("Number of Top Occupations to Display:", style = "margin: -15px;",
+                                     create_info_button("num_socs_info", "")
+                          ),
+                          choices = c(
+                            "5" = "5",
+                            "10" = "10",
+                            "15" = "15",
+                            "20" = "20",
+                            "25" = "25",
+                            "All Available" = "all"
+                          ),
+                          selected = "15",
+                          inline = TRUE
+                        )
                       ),
                       
                       br(),

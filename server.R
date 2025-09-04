@@ -33,17 +33,20 @@ map_award_level <- function(x) {
   x_chr <- as.character(x)
   x_num <- suppressWarnings(as.integer(x_chr))
   lookup <- c(
+    "20" = "<12 Week Cert",
+    "21" = "12W–1Y Cert",
     "1"  = "<1 Year Award",
     "2"  = "1–2 Year Cert",
     "3"  = "Associate’s",
     "4"  = "2–4 Year Cert",
-    "5"  = "Bachelor’s",
-    "20" = "<12 Week Cert",
-    "21" = "12W–1Y Cert"
+    "5"  = "Bachelor’s"
   )
+
+  # Define natural order for award levels (short → long)
+  levels_award <- c("<12 Week Cert", "12W–1Y Cert", "<1 Year Award", "1–2 Year Cert", "Associate’s", "2–4 Year Cert", "Bachelor’s")
   mapped <- unname(lookup[as.character(x_num)])
   mapped[is.na(mapped)] <- "Other"
-  factor(mapped, levels = c(unname(lookup), "Other"))
+  factor(mapped, levels = c(levels_award, "Other"))
 }
 
 # CIP Group mapping (by first two digits of CIP code)
@@ -53,6 +56,66 @@ get_cip_group <- function(cip_code) {
   prefix <- substr(stringr::str_pad(code_chr, 2, pad = "0"), 1, 2)
   prefix[nchar(code_chr) == 0 | is.na(code_chr)] <- NA_character_
   groups <- c(
+    "01" = "Agriculture",
+    "03" = "Nat Resources",
+    "04" = "Architecture",
+    "05" = "Area/Eth/Cult",
+    "09" = "Comm & Journ",
+    "10" = "Comm Tech",
+    "11" = "CS/Info Sci",
+    "12" = "Culinary & Pers",
+    "13" = "Education",
+    "14" = "Engr",
+    "15" = "Eng Tech",
+    "16" = "Lang & Ling",
+    "19" = "Family & Cons",
+    "22" = "Legal Studies",
+    "23" = "English",
+    "24" = "Liberal Arts",
+    "25" = "Library Sci",
+    "26" = "Bio & Biomed",
+    "27" = "Math & Stats",
+    "28" = "ROTC/JROTC",
+    "29" = "Military Tech",
+    "30" = "Multidisc",
+    "31" = "Parks/Rec/Fit",
+    "32" = "Basic Skills",
+    "33" = "Citizenship",
+    "34" = "Health Skills",
+    "35" = "Interpersonal",
+    "36" = "Leisure & Rec",
+    "37" = "Personal Dev",
+    "38" = "Phil/Religion",
+    "39" = "Theology/Voc",
+    "40" = "Physical Sci",
+    "41" = "Science Tech",
+    "42" = "Psychology",
+    "43" = "Security/Prot",
+    "44" = "Public Admin/SS",
+    "45" = "Social Sci",
+    "46" = "Construction",
+    "47" = "Mech & Repair",
+    "48" = "Precision Prod",
+    "49" = "Transp/Moving",
+    "50" = "Visual/Perf Arts",
+    "51" = "Health Prof",
+    "52" = "Biz & Mgmt",
+    "53" = "HS Dipl/Cert",
+    "54" = "History",
+    "60" = "Residency"
+  )
+  out <- unname(groups[prefix])
+  out[is.na(out)] <- "Other"
+  out
+}
+
+# CIP Group mapping function (full names for tooltips)
+get_cip_group_full <- function(cip_code) {
+  code_chr <- gsub("[^0-9]", "", as.character(cip_code))
+  # Vectorized handling: derive two-digit prefixes, NA if empty
+  prefix <- substr(stringr::str_pad(code_chr, 2, pad = "0"), 1, 2)
+  prefix[nchar(code_chr) == 0 | is.na(code_chr)] <- NA_character_
+  groups_full <- c(
     "01" = "Agriculture, Agriculture Operations, and Related Sciences",
     "03" = "Natural Resources and Conservation",
     "04" = "Architecture and Related Services",
@@ -101,7 +164,7 @@ get_cip_group <- function(cip_code) {
     "54" = "History",
     "60" = "Residency Programs"
   )
-  out <- unname(groups[prefix])
+  out <- unname(groups_full[prefix])
   out[is.na(out)] <- "Other"
   out
 }
@@ -188,7 +251,7 @@ utils::globalVariables(c(
   "mean_population", "pop_year", "posts_total", "posts_airea", "soc_title",
   "ed_req", "total_postings", "total_soc", "mean_completions", "mean_airea_completions",
   "pct_airea_completions", "mean_students_enrolled", "rural", "tribal", "soc", "cip",
-  "soc_group", "soc_group_full", "soc_group_postings", "cip_group", "cip_group_total", "tooltip", "total_airea_completions", "airea_pct",
+  "soc_group", "soc_group_full", "soc_group_postings", "cip_group", "cip_group_full", "cip_group_total", "tooltip", "total_airea_completions", "airea_pct",
   "nat_value", "posts_per_100k", "AIREA%", "AIREA%_num", "Rural", "Tribal",
   "Mean Completions (per year)", "Mean AIREA Completions (per year)", "Mean Enrollment (per year)",
   "mean_airea_posts", "mean_pct", "mean_per1000"
@@ -269,12 +332,12 @@ ccrc_theme <-
   theme_minimal(base_size = 13) +
   theme(
     text = element_text(color = ccrc_colors$gray),
-    plot.title = 
+    plot.title =
       element_text(
-        color = ccrc_colors$purple, 
+        color = ccrc_colors$purple,
         face = "bold",
         size = 24,
-        hjust = 0),
+        hjust = 0.5),
     axis.title = element_text(color = ccrc_colors$gray, face = "bold"),
     axis.text = element_text(color = ccrc_colors$gray),
     panel.grid.minor = element_blank(),
@@ -390,7 +453,7 @@ server <- function(input, output, session) {
       inst_col <- name_map[inst_idx[1]]
       updateSelectizeInput(
         session, "supply_search",
-        choices = sort(unique(as.character(supply_table_df[[inst_col]]))), server = TRUE, selected = character(0)
+        choices = sort(unique(as.character(supply_table_df[[inst_col]]))), server = TRUE, selected = ""
       )
       
       leaders_airea <- if (!is.null(leaders_supply_airea)) {
@@ -551,7 +614,7 @@ server <- function(input, output, session) {
     
     y_col <- if (metric == "pct") "airea_pct" else "total_airea_completions"
     y_label <- if (metric == "pct") "AIREA Credentials Percentage (%)" else "Number of AIREA Credentials"
-    title_txt <- if (metric == "pct") "AIREA Credentials Percentage Over Time" else "AIREA Credentials Over Time"
+    title_txt <- if (metric == "pct") "AIREA Credentials Percentage" else "AIREA Credentials"
     title_txt <- paste(title_txt, "—", my_inst$instnm)
     
     # Join national average appropriate to metric
@@ -607,25 +670,31 @@ server <- function(input, output, session) {
       filter(total_airea_completions > 0) %>%
       mutate(
         award_level = map_award_level(award_level),
-        award_level = forcats::fct_rev(award_level),
-        cip_group = get_cip_group(cip)
+        cip_group = get_cip_group(cip),
+        cip_group_full = get_cip_group_full(cip)
       ) %>%
       group_by(cip_group) %>%
       mutate(cip_group_total = sum(total_airea_completions)) %>%
       ungroup() %>%
       arrange(desc(cip_group_total), desc(total_airea_completions)) %>%
+      # Sort CIP groups by total credentials (descending)
+      arrange(desc(cip_group_total)) %>%
+      mutate(
+        cip_group = factor(cip_group, levels = unique(cip_group))
+      ) %>%
+      # Sort programs within groups by total credentials (descending)
       group_by(cip_group) %>%
       arrange(desc(total_airea_completions), .by_group = TRUE) %>%
-      ungroup() %>%
       mutate(
         ciptitle = factor(ciptitle, levels = rev(unique(ciptitle))),
         tooltip = paste0(
-          "Field: ", cip_group,
+          "Field: ", cip_group_full,
           "\nProgram: ", ciptitle,
           "\nAward Level: ", award_level,
           "\nCredentials: ", scales::comma(total_airea_completions)
         )
-      )
+      ) %>%
+      ungroup()
     if (nrow(plot_df) == 0) return(NULL)
     
     bar_style <- input$supply_bar_style
@@ -641,7 +710,7 @@ server <- function(input, output, session) {
 
     if (bar_style == "filled") {
       p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
+        geom_col_interactive(aes(tooltip = tooltip), position = position_fill(reverse = TRUE)) +
         coord_flip() +
         ccrc_theme +
         scale_y_continuous(position = "right") +
@@ -653,6 +722,7 @@ server <- function(input, output, session) {
           fill = "Award level"
         ) +
         scale_fill_manual(values = ccrc_palette) +
+        guides(fill = guide_legend(reverse = TRUE)) +
         theme(
           legend.position = "top",
           legend.justification = "left",
@@ -667,18 +737,19 @@ server <- function(input, output, session) {
       girafe(ggobj = p, height_svg = h, width_svg = 16)
     } else {
       p <- ggplot(plot_df, aes(x = ciptitle, y = total_airea_completions, fill = award_level)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
+        geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
         coord_flip() +
         ccrc_theme +
         scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
         scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
-          title = paste("AIREA Credentials by CIP —", my_inst$instnm, title_suffix),
+          title = paste("AIREA Credentials —", my_inst$instnm, title_suffix),
           y = "Number of AIREA Credentials",
           x = NULL,
           fill = "Award level"
         ) +
         scale_fill_manual(values = ccrc_palette) +
+        guides(fill = guide_legend(reverse = TRUE)) +
         theme(
           legend.position = "top",
           legend.justification = "left",
@@ -902,7 +973,7 @@ server <- function(input, output, session) {
                       airea = "AIREA job posts",
                       pct = "AIREA job posts (%)",
                       per100k = "AIREA job posts per 100,000")
-    title_txt <- paste("AIREA Job Posts Over Time —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
+    title_txt <- paste("AIREA Job Posts —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
     
     # Add tooltip
     demand_selected <- demand_selected %>%
@@ -986,7 +1057,15 @@ server <- function(input, output, session) {
       base_tbl <- base_tbl %>% filter(year == !!selected_year)
     }
     # Use user-selected limit if provided; otherwise default to 10
-    n_to_show <- if (!is.null(input$num_socs) && is.finite(input$num_socs)) as.integer(input$num_socs) else 10
+    n_to_show <- if (!is.null(input$num_socs) && nzchar(input$num_socs)) {
+      if (input$num_socs == "all") {
+        Inf  # Show all available occupations
+      } else {
+        as.integer(input$num_socs)
+      }
+    } else {
+      10
+    }
     
     # Group by soc, soc_title, and ed_req to get SOC codes for grouping
     plot_data <- base_tbl %>%
@@ -999,7 +1078,6 @@ server <- function(input, output, session) {
         soc_group = get_soc_group(soc),
         soc_group_full = get_soc_group_full(soc),
         ed_req = label_to_factor(ed_req),
-        ed_req = forcats::fct_rev(ed_req),
         ed_req = forcats::fct_na_value_to_level(ed_req, "Missing")
       ) %>%
       # Calculate totals by occupation and by SOC group
@@ -1010,23 +1088,18 @@ server <- function(input, output, session) {
       ungroup() %>%
       # Select top occupations
       slice_max(order_by = total_soc, n = n_to_show, with_ties = FALSE) %>%
-      # Apply SOC grouping logic
-      arrange(desc(soc_group_postings), desc(total_soc)) %>%
-      # Create properly ordered factors for plotting (within-group sorting)
+      # Sort SOC groups by total postings (descending)
+      arrange(desc(soc_group_postings)) %>%
+      mutate(
+        soc_group = factor(soc_group, levels = unique(soc_group))
+      ) %>%
+      # Sort occupations within groups by total postings (descending)
       group_by(soc_group) %>%
       arrange(desc(total_soc), .by_group = TRUE) %>%
       mutate(
-        # Create factor with levels ordered by magnitude within each group
-        # Reverse the order so largest appears at top when using coord_flip()
         soc_title = factor(soc_title, levels = rev(unique(soc_title)))
       ) %>%
-      ungroup() %>%
-      # Create group ordering (use existing soc_group_postings)
-      arrange(desc(soc_group_postings)) %>%
-      mutate(
-        # Create ordered factor for SOC groups (largest groups first)
-        soc_group = factor(soc_group, levels = unique(soc_group))
-      )
+      ungroup()
     
     return(plot_data)
   })
@@ -1060,7 +1133,7 @@ server <- function(input, output, session) {
     
     if (bar_style == "filled") {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = "fill") +
+        geom_col_interactive(aes(tooltip = tooltip), position = position_fill(reverse = TRUE)) +
         coord_flip() +
         scale_y_continuous(labels = scales::percent) +
         labs(
@@ -1084,13 +1157,13 @@ server <- function(input, output, session) {
         ) +
         scale_fill_manual(values = ccrc_palette) +
         scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
-        guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
+        guides(fill = guide_legend(reverse = TRUE)) +
         facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
                    labeller = labeller(soc_group = label_wrap_gen(18)))
       girafe(ggobj = p, height_svg = h, width_svg = 16)
     } else {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
+        geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
         coord_flip() +
         scale_y_continuous(labels = scales::comma) +
         labs(
@@ -1114,7 +1187,7 @@ server <- function(input, output, session) {
         ) +
         scale_fill_manual(values = ccrc_palette) +
         scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
-        guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
+        guides(fill = guide_legend(reverse = TRUE)) +
         facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
                    labeller = labeller(soc_group = label_wrap_gen(18)))
       girafe(ggobj = p, height_svg = h, width_svg = 16)
