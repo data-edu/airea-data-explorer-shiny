@@ -318,7 +318,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_degrees_by_institution", width = "75%"),
+                    girafeOutput("supply_degrees_by_institution", width = "80%"),
                     br(),
                     div(
                       class = "selector-box",
@@ -346,7 +346,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_cip_award_bar", width = "85%"),
+                    girafeOutput("supply_cip_award_bar", width = "90%"),
                     br(),
                     div(
                       class = "selector-box",
@@ -492,7 +492,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_cz_trend", width = "75%"),
+                    girafeOutput("demand_cz_trend", width = "80%"),
                     br(),
                     div(
                       class = "selector-box",
@@ -523,7 +523,7 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_soc_edreq_bar", width = "85%"),
+                    girafeOutput("demand_soc_edreq_bar", width = "90%"),
                     br(),
                     div(
                       class = "selector-box",
