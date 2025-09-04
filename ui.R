@@ -125,7 +125,7 @@ navbarPage(
   tabPanel(title = 
              div(
                "Map",
-               create_info_button("map_overview_info", "")
+               create_info_button("map_panel_info", "")
              ),
            value = "mainmap",
            
