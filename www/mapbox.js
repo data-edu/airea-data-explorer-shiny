@@ -69,8 +69,9 @@ document.addEventListener("DOMContentLoaded", function () {
  // ──────────────────────────────────────────────────────────────────────────
 
   function createCombinedLegend() {
-    // If legend already exists, skip
-    if (document.getElementById("legend")) return;
+    // If legend already exists (e.g., hot reload), remove and rebuild to avoid stale state
+    const existing = document.getElementById("legend");
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
     const legend = document.createElement("div");
     legend.id = "legend";
@@ -84,7 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
       fontSize:      "12px",
       boxShadow:     "0 0 3px rgba(0,0,0,0.4)",
       borderRadius:  "4px",
-      zIndex:        1
+      zIndex:        1000,
+      pointerEvents: "none"
     });
 
     // Upper section: CZ legend (refreshed later by updateCZLegend)
@@ -113,6 +115,13 @@ document.addEventListener("DOMContentLoaded", function () {
     legend.appendChild(instSection);
 
     map.getContainer().appendChild(legend);
+  }
+
+  function ensureLegend() {
+    if (!document.getElementById("legend")) {
+      createCombinedLegend();
+      updateCZLegend(currentCZMetric);
+    }
   }
 
 function updateCZLegend(metric) {
@@ -204,9 +213,11 @@ function updateCZLegend(metric) {
   // ──────────────────────────────────────────────────────────────────────────
   Shiny.addCustomMessageHandler("loadYear", function(year) {
     loadCZDataForYear(year);
+    ensureLegend();
   });
   Shiny.addCustomMessageHandler("loadInstituteYear", function(year) {
     loadInstituteDataForYear(year);
+    ensureLegend();
   });
   Shiny.addCustomMessageHandler("updateSearch", function(coords) {
     if (searchPopup) searchPopup.remove();
@@ -220,6 +231,7 @@ function updateCZLegend(metric) {
   Shiny.addCustomMessageHandler("updateCZMetric", function(metric) {
     currentCZMetric = metric;
     if (map.getLayer("cz-layer")) applyCZPaint(metric);
+    ensureLegend();
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -329,8 +341,8 @@ function loadInstituteDataForYear(year) {
         map.getSource("institutes").setData(data);
       }
 
-      // refresh the institute legend
-      addInstituteLegend();
+      // Ensure legend is visible after institute data loads
+      ensureLegend();
     })
     .catch(err => console.error("Error loading " + url, err));
 }

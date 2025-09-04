@@ -310,3 +310,9 @@ hr80 {
 #collapse_panel .panel-heading {
   background-color: #f2f8f2;  /* light green */
 }
+
+/* Map legend safety: keep visible above other elements */
+#legend {
+  z-index: 1000 !important;
+  pointer-events: none !important;
+}
