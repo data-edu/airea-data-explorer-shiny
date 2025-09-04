@@ -7,6 +7,7 @@ library(dplyr)
 library(readr)
 library(tidyr)
 library(scales)
+library(stringr)
 # library(arrow)  # Removed: now using DuckDB
 library(ggplot2)
 library(plotly)
@@ -27,6 +28,80 @@ label_to_factor <- function(x) {
   }
 }
 
+# SOC Group mapping function
+get_soc_group <- function(soc_code) {
+  # Extract the 2-digit SOC group code
+  soc_group <- substr(as.character(soc_code), 1, 2)
+  
+  # Map to shortened group names for better chart readability
+  soc_group_names <- c(
+    "11" = "Management",
+    "13" = "Business & Financial Ops", 
+    "15" = "Computer & Math",
+    "17" = "Architecture & Engineering",
+    "19" = "Life/Physical/Social Sci",
+    "21" = "Community & Social Service",
+    "23" = "Legal",
+    "25" = "Education & Library",
+    "27" = "Arts, Media & Sports",
+    "29" = "Healthcare Practitioners & Tech",
+    "31" = "Healthcare Support",
+    "33" = "Protective Service",
+    "35" = "Food Prep & Serving",
+    "37" = "Building & Grounds Maint",
+    "39" = "Personal Care & Service",
+    "41" = "Sales & Related",
+    "43" = "Office & Admin Support",
+    "45" = "Farming/Fishing/Forestry",
+    "47" = "Construction & Extraction",
+    "49" = "Install/Maint/Repair",
+    "51" = "Production",
+    "53" = "Transportation & Material Moving"
+  )
+  
+  # Return the group name, or "Other" if not found
+  ifelse(soc_group %in% names(soc_group_names), 
+         soc_group_names[soc_group], 
+         "Other")
+}
+
+# Function to get full SOC group name for tooltips
+get_soc_group_full <- function(soc_code) {
+  # Extract the 2-digit SOC group code
+  soc_group <- substr(as.character(soc_code), 1, 2)
+  
+  # Map to full group names for tooltips
+  soc_group_names_full <- c(
+    "11" = "Management Occupations",
+    "13" = "Business and Financial Operations Occupations", 
+    "15" = "Computer and Mathematical Occupations",
+    "17" = "Architecture and Engineering Occupations",
+    "19" = "Life, Physical, and Social Science Occupations",
+    "21" = "Community and Social Service Occupations",
+    "23" = "Legal Occupations",
+    "25" = "Education, Training, and Library Occupations",
+    "27" = "Arts, Design, Entertainment, Sports, and Media Occupations",
+    "29" = "Healthcare Practitioners and Technical Occupations",
+    "31" = "Healthcare Support Occupations",
+    "33" = "Protective Service Occupations",
+    "35" = "Food Preparation and Serving Related Occupations",
+    "37" = "Building and Grounds Cleaning and Maintenance Occupations",
+    "39" = "Personal Care and Service Occupations",
+    "41" = "Sales and Related Occupations",
+    "43" = "Office and Administrative Support Occupations",
+    "45" = "Farming, Fishing, and Forestry Occupations",
+    "47" = "Construction and Extraction Occupations",
+    "49" = "Installation, Maintenance, and Repair Occupations",
+    "51" = "Production Occupations",
+    "53" = "Transportation and Material Moving Occupations"
+  )
+  
+  # Return the full group name, or "Other" if not found
+  ifelse(soc_group %in% names(soc_group_names_full), 
+         soc_group_names_full[soc_group], 
+         "Other")
+}
+
 # Declare global variables to appease linters for NSE in dplyr/ggplot2
 utils::globalVariables(c(
   "instnm", "year", "cz_label", "total_completions", "total_students_enrolled",
@@ -35,7 +110,11 @@ utils::globalVariables(c(
   "population", "posts_per_1000", "airea_percentage", "total_job_postings",
   "mean_population", "pop_year", "posts_total", "posts_airea", "soc_title",
   "ed_req", "total_postings", "total_soc", "mean_completions", "mean_airea_completions",
-  "pct_airea_completions", "mean_students_enrolled", "rural", "tribal"
+  "pct_airea_completions", "mean_students_enrolled", "rural", "tribal", "soc",
+  "soc_group", "soc_group_full", "soc_group_postings", "tooltip", "total_airea_completions", "airea_pct",
+  "nat_value", "posts_per_100k", "AIREA%", "AIREA%_num", "Rural", "Tribal",
+  "Mean Completions (per year)", "Mean AIREA Completions (per year)", "Mean Enrollment (per year)",
+  "mean_airea_posts", "mean_pct", "mean_per1000"
 ))
 
 # ==============================================================================
@@ -800,21 +879,45 @@ server <- function(input, output, session) {
     }
     # Use user-selected limit if provided; otherwise default to 10
     n_to_show <- if (!is.null(input$num_socs) && is.finite(input$num_socs)) as.integer(input$num_socs) else 10
-    base_tbl %>%
-      group_by(soc_title, ed_req) %>%
+    
+    # Group by soc, soc_title, and ed_req to get SOC codes for grouping
+    plot_data <- base_tbl %>%
+      group_by(soc, soc_title, ed_req) %>%
       summarise(total_postings = sum(total_job_postings, na.rm = TRUE), .groups = "drop") %>%
       collect() %>%
-      filter(!is.na(soc_title)) %>%
+      filter(!is.na(soc_title), !is.na(soc)) %>%
       mutate(
+        # Add SOC group information (short names for display, full names for tooltips)
+        soc_group = get_soc_group(soc),
+        soc_group_full = get_soc_group_full(soc),
         ed_req = label_to_factor(ed_req),
         ed_req = forcats::fct_rev(ed_req),
         ed_req = forcats::fct_na_value_to_level(ed_req, "Missing")
       ) %>%
+      # Calculate totals by occupation and by SOC group
       group_by(soc_title) %>%
       mutate(total_soc = sum(total_postings)) %>%
+      group_by(soc_group) %>%
+      mutate(soc_group_postings = sum(total_postings)) %>%
       ungroup() %>%
+      # Select top occupations
       slice_max(order_by = total_soc, n = n_to_show, with_ties = FALSE) %>%
-      mutate(soc_title = forcats::fct_reorder(soc_title, total_soc))
+      # Order by SOC group total first, then by individual occupation total within each group
+      arrange(desc(soc_group_postings), desc(total_soc)) %>%
+      # Create properly ordered factors for plotting (within-group sorting)
+      group_by(soc_group) %>%
+      arrange(desc(total_soc), .by_group = TRUE) %>%
+      mutate(
+        # Create factor with levels ordered by magnitude within each group
+        soc_title = factor(soc_title, levels = unique(soc_title))
+      ) %>%
+      ungroup() %>%
+      mutate(
+        # Order SOC groups by their total postings
+        soc_group = factor(soc_group, levels = unique(soc_group[order(desc(soc_group_postings))]))
+      )
+    
+    return(plot_data)
   })
 
   output$demand_soc_edreq_bar <- renderGirafe({
@@ -823,7 +926,7 @@ server <- function(input, output, session) {
     year_choice <- input$demand_bar_year
     title_suffix <- if (!is.null(year_choice) && !identical(year_choice, "Overall")) paste0(" — ", year_choice) else " — Overall"
     title_txt <- paste(
-      "Top AIREA Occupations —",
+      "Top AIREA Occupations by SOC Group —",
       gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)),
       title_suffix
     )
@@ -832,16 +935,17 @@ server <- function(input, output, session) {
     bar_style <- input$demand_bar_style
     if (is.null(bar_style)) bar_style <- "single"
     
-    # Add tooltips
+    # Add tooltips including SOC group information
     plot_df <- plot_df %>%
       mutate(
-        tooltip = paste0("Occupation: ", soc_title, "\nEducation: ", ed_req, "\nPostings: ", scales::comma(total_postings))
+        tooltip = paste0("SOC Group: ", soc_group_full, "\nOccupation: ", soc_title, "\nEducation: ", ed_req, "\nPostings: ", scales::comma(total_postings))
       )
     
-    # Dynamic height based on number of bars
-    base <- 3
+    # Dynamic height based on number of bars plus space for group labels
+    base <- 4
     height_per_bar <- 0.4
-    h <- max(6, base + height_per_bar * length(unique(plot_df$soc_title)))
+    num_groups <- length(unique(plot_df$soc_group))
+    h <- max(8, base + height_per_bar * nrow(plot_df) + 0.5 * num_groups)
     
     if (bar_style == "filled") {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
@@ -861,11 +965,18 @@ server <- function(input, output, session) {
           legend.position = "top",
           legend.justification = "left",
           legend.box.just = "left",
-          legend.box = "horizontal"
+          legend.box = "horizontal",
+          strip.placement = "outside",
+          strip.background = element_blank(),
+          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
+          plot.margin = margin(10, 30, 10, 160)  # give the strip room on the left
         ) +
         scale_fill_manual(values = ccrc_palette) +
-        guides(fill = guide_legend(nrow = 3, byrow = TRUE))
-      girafe(ggobj = p, height_svg = h, width_svg = 12)
+        scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
+        guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
+        facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
+                   labeller = labeller(soc_group = label_wrap_gen(18)))
+      girafe(ggobj = p, height_svg = h, width_svg = 14)
     } else {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
@@ -884,11 +995,18 @@ server <- function(input, output, session) {
           legend.position = "top",
           legend.justification = "left",
           legend.box.just = "left",
-          legend.box = "horizontal"
+          legend.box = "horizontal",
+          strip.placement = "outside",
+          strip.background = element_blank(),
+          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
+          plot.margin = margin(10, 30, 10, 160)  # give the strip room on the left
         ) +
         scale_fill_manual(values = ccrc_palette) +
-        guides(fill = guide_legend(nrow = 3, byrow = TRUE))
-      girafe(ggobj = p, height_svg = h, width_svg = 12)
+        scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
+        guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
+        facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
+                   labeller = labeller(soc_group = label_wrap_gen(18)))
+      girafe(ggobj = p, height_svg = h, width_svg = 14)
     }
   })
 }
