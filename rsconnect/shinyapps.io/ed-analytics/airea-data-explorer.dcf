@@ -5,7 +5,7 @@ account: ed-analytics
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14999294
-bundleId: 10854130
+bundleId: 10863371
 url: https://ed-analytics.shinyapps.io/airea-data-explorer/
 version: 1
 asMultiple: FALSE
