@@ -26,6 +26,24 @@ navbarPage(
   
   tags$head(
     includeCSS("custom-style.css"),
+    tags$style(HTML('
+      /* Center contents inside our selector boxes */
+      .selector-box { text-align: center; }
+      .selector-box .shiny-input-container { margin-left: auto; margin-right: auto; }
+      /* Center the value inside numeric and select inputs */
+      .selector-box input.form-control { text-align: center; }
+      .selector-box .selectize-input { text-align: center; }
+      .selector-box select.form-control { text-align: center; }
+      /* Keep radio choices neatly centered as a block */
+      .selector-box .shiny-input-radiogroup .shiny-options-group { display: inline-block; text-align: left; }
+
+      /* Center values in the Supply tab search selects */
+      .center-selects { text-align: center; }
+      .center-selects .shiny-input-container { margin-left: auto; margin-right: auto; }
+      .center-selects .selectize-input { text-align: center; }
+      .center-selects select.form-control { text-align: center; text-align-last: center; }
+      .center-selects input.form-control { text-align: center; }
+    ')),
     
     # Mapbox & JS Include Mapbox GL JS and custom scripts
     tags$link(rel="stylesheet", 
@@ -237,6 +255,7 @@ navbarPage(
                       
                       
                       div(
+                        class = "center-selects",
                         style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
                         
                         h3("Search By:", style = "text-align: center;"),
@@ -275,7 +294,7 @@ navbarPage(
                             "or"
                           ),
                           div(
-                            style = "flex: 1; min-width: 200px max-width: 32%;",
+                            style = "flex: 1; min-width: 200px; max-width: 32%;",
                             selectInput(
                               inputId = "supply_leader_pct",
                               label = tags$strong("Top 50 colleges by AIREA % of credentials (mean per year)",
@@ -302,6 +321,7 @@ navbarPage(
                     girafeOutput("supply_degrees_by_institution", width = "75%"),
                     br(),
                     div(
+                      class = "selector-box",
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_metric",
@@ -326,9 +346,10 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_cip_award_bar", width = "75%"),
+                    girafeOutput("supply_cip_award_bar", width = "85%"),
                     br(),
                     div(
+                      class = "selector-box",
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_bar_style",
@@ -396,6 +417,7 @@ navbarPage(
                       
                       
                       div(
+                        class = "center-selects",
                         style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:100%; margin:0 auto;",
                         
                         h3("Search By:", style = "text-align: center;"),
@@ -473,6 +495,7 @@ navbarPage(
                     girafeOutput("demand_cz_trend", width = "75%"),
                     br(),
                     div(
+                      class = "selector-box",
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
                       radioButtons(
@@ -500,9 +523,10 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_soc_edreq_bar", width = "75%"),
+                    girafeOutput("demand_soc_edreq_bar", width = "85%"),
                     br(),
                     div(
+                      class = "selector-box",
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
                       radioButtons(

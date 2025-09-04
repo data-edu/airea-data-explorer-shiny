@@ -902,19 +902,22 @@ server <- function(input, output, session) {
       ungroup() %>%
       # Select top occupations
       slice_max(order_by = total_soc, n = n_to_show, with_ties = FALSE) %>%
-      # Order by SOC group total first, then by individual occupation total within each group
+      # Apply SOC grouping logic
       arrange(desc(soc_group_postings), desc(total_soc)) %>%
       # Create properly ordered factors for plotting (within-group sorting)
       group_by(soc_group) %>%
       arrange(desc(total_soc), .by_group = TRUE) %>%
       mutate(
         # Create factor with levels ordered by magnitude within each group
-        soc_title = factor(soc_title, levels = unique(soc_title))
+        # Reverse the order so largest appears at top when using coord_flip()
+        soc_title = factor(soc_title, levels = rev(unique(soc_title)))
       ) %>%
       ungroup() %>%
+      # Create group ordering (use existing soc_group_postings)
+      arrange(desc(soc_group_postings)) %>%
       mutate(
-        # Order SOC groups by their total postings
-        soc_group = factor(soc_group, levels = unique(soc_group[order(desc(soc_group_postings))]))
+        # Create ordered factor for SOC groups (largest groups first)
+        soc_group = factor(soc_group, levels = unique(soc_group))
       )
     
     return(plot_data)
@@ -926,7 +929,7 @@ server <- function(input, output, session) {
     year_choice <- input$demand_bar_year
     title_suffix <- if (!is.null(year_choice) && !identical(year_choice, "Overall")) paste0(" — ", year_choice) else " — Overall"
     title_txt <- paste(
-      "Top AIREA Occupations by SOC Group —",
+      "Top AIREA Occupations —",
       gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)),
       title_suffix
     )
@@ -941,11 +944,11 @@ server <- function(input, output, session) {
         tooltip = paste0("SOC Group: ", soc_group_full, "\nOccupation: ", soc_title, "\nEducation: ", ed_req, "\nPostings: ", scales::comma(total_postings))
       )
     
-    # Dynamic height based on number of bars plus space for group labels
-    base <- 4
+    # Dynamic height based on number of bars plus space for group labels and title
+    base <- 6  # increased base for title space
     height_per_bar <- 0.4
     num_groups <- length(unique(plot_df$soc_group))
-    h <- max(8, base + height_per_bar * nrow(plot_df) + 0.5 * num_groups)
+    h <- max(11, base + height_per_bar * nrow(plot_df) + 0.5 * num_groups)
     
     if (bar_style == "filled") {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
@@ -969,14 +972,14 @@ server <- function(input, output, session) {
           strip.placement = "outside",
           strip.background = element_blank(),
           strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
-          plot.margin = margin(10, 30, 10, 160)  # give the strip room on the left
+          plot.margin = margin(80, 30, 10, 160)  # give more room for title (top) and strips (left)
         ) +
         scale_fill_manual(values = ccrc_palette) +
         scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
         guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
         facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
                    labeller = labeller(soc_group = label_wrap_gen(18)))
-      girafe(ggobj = p, height_svg = h, width_svg = 14)
+      girafe(ggobj = p, height_svg = h, width_svg = 16)
     } else {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
         geom_col_interactive(aes(tooltip = tooltip), position = "stack") +
@@ -999,14 +1002,14 @@ server <- function(input, output, session) {
           strip.placement = "outside",
           strip.background = element_blank(),
           strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
-          plot.margin = margin(10, 30, 10, 160)  # give the strip room on the left
+          plot.margin = margin(80, 30, 10, 160)  # give more room for title (top) and strips (left)
         ) +
         scale_fill_manual(values = ccrc_palette) +
         scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
         guides(fill = guide_legend(nrow = 3, byrow = TRUE)) +
         facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
                    labeller = labeller(soc_group = label_wrap_gen(18)))
-      girafe(ggobj = p, height_svg = h, width_svg = 14)
+      girafe(ggobj = p, height_svg = h, width_svg = 16)
     }
   })
 }
