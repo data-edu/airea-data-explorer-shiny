@@ -360,7 +360,7 @@ navbarPage(
                           "Share of Award Types within Programs" = "filled",
                           "Number of Credentials by Program" = "single"
                         ),
-                        selected = "filled",
+                        selected = "single",
                         inline = FALSE,
                         width = "90%"
                       ),
