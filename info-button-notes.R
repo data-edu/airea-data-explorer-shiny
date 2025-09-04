@@ -30,10 +30,22 @@ info_notes <-
     
     
     ############################################################################
-    map_overview_info = list(
+    map_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Explore the number and share of AIREA job postings by year in each of the nation's commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
+        ""
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    map_panel_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Explore the number and share of AIREA job postings by year in each commuting zone. For every community college, see what proportion of their awarded credentials are in AIREA fields."
       )),
       placement = "right",
       trigger = "hover",
