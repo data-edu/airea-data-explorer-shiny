@@ -271,9 +271,11 @@ info_notes <-
     
     ############################################################################
     num_socs_info = list(
-      title = "More Information",
+      title = "Occupation Display Options",
       content = HTML(paste0(
-        "Notes to be added here."
+        "<strong>Top 5/10/15/20/25:</strong> Shows the occupations with the highest number of job postings in the selected area.<br><br>",
+        "<strong>All Available:</strong> Displays all occupations that have AIREA-related job postings (no limit).<br><br>",
+        "<em>Note: The actual number shown may be less than selected if fewer occupations exist with AIREA job postings.</em>"
       )),
       placement = "right",
       trigger = "hover",
