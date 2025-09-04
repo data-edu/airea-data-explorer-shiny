@@ -33,7 +33,19 @@ info_notes <-
     map_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Explore the number and share of AIREA job postings by year in each of the nation's commuting zones. For every community college in the country, see what proportion of their awarded credentials are in AIREA fields."
+        ""
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    map_panel_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Explore the number and share of AIREA job postings by year in each commuting zone. For every community college, see what proportion of their awarded credentials are in AIREA fields."
       )),
       placement = "right",
       trigger = "hover",
@@ -70,6 +82,234 @@ info_notes <-
       title = "More Information",
       content = HTML(paste0(
         "Learn more about what jobs and credentials are included in the AIREA Data Explorer and as well as the data sources for this analysis."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    map_year_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    map_color_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    map_institution_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_search_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_leader_airea_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_leader_pct_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_metric_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_bar_style_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    supply_bar_year_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    cz_search_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    cz_leader_posts_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    cz_leader_pct_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    cz_leader_per1000_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    demand_metric_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    demand_bar_style_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    num_socs_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    demand_bar_year_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    institutions_table_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
+      )),
+      placement = "right",
+      trigger = "hover",
+      options = list(container = "body")
+    ),
+    
+    
+    ############################################################################
+    job_postings_table_info = list(
+      title = "More Information",
+      content = HTML(paste0(
+        "Notes to be added here."
       )),
       placement = "right",
       trigger = "hover",

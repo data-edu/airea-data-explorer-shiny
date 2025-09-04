@@ -18,8 +18,8 @@ source("info-button-notes.R")
 
 navbarPage(
   id = "tabs",
-
-    
+  
+  
   # ============================================================================
   # CSS for styling
   # ============================================================================
@@ -47,11 +47,19 @@ navbarPage(
   title = 
     div(
       div(style = "height: 40px;"),
-      h1(img(src = "logo-airea.png", height = "60px"),
-         br(),
-         div(style = "height: 10px;"),
-         "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"
-         )
+      div(
+        style = "display: flex; align-items: center; justify-content: space-between; width: 100%;",
+        h1(
+          style = "margin: 0; flex-grow: 1; padding-right: 20px;",
+          "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"
+        ),
+        img(
+          src = "logo-airea.png", 
+          height = "80px",
+          style = "flex-shrink: 0;"
+        )
+      ),
+      div(style = "height: 10px;")
     ),
   
   
@@ -61,7 +69,7 @@ navbarPage(
   # ============================================================================
   # Header: Navigation Bar
   # ============================================================================
-
+  
   header = 
     div(
       class = "app-header",
@@ -69,11 +77,11 @@ navbarPage(
       
       hr()
     ),
-    
   
   
   
-    
+  
+  
   # ============================================================================
   # Footer
   # ============================================================================
@@ -99,7 +107,7 @@ navbarPage(
         HTML("&emsp;"),
         tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-utk.jpg", alt = "CCRC logo"),
         HTML("&emsp;"),
-        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo"),
+        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo")
       ),
       
       hr(),
@@ -117,7 +125,7 @@ navbarPage(
   tabPanel(title = 
              div(
                "Map",
-               create_info_button("map_info", "")
+               create_info_button("map_panel_info", "")
              ),
            value = "mainmap",
            
@@ -155,20 +163,29 @@ navbarPage(
                          width = 360, height = "auto",
                          
                          selectInput("selected_year_map",
-                                     div(style = "margin-top: 15px;", h3("Select Year:")),
+                                     div(style = "margin-top: 15px; margin-left: -35px;", 
+                                         h3("Select Year:",
+                                            create_info_button("map_year_info", "")
+                                         )),
                                      choices = rev(2010:2023),
                                      selected = 2023
                          ),
                          selectInput("cz_metric", 
-                                     tags$h3("Color By:"), 
+                                     div(style = "margin-top: 15px; margin-left: -35px;",
+                                         h3("Color By:",
+                                            create_info_button("map_color_info", "")
+                                         )), 
                                      choices = c(
                                        "Number of AIREA Job Postings" = "airea_job_posting",
                                        "% AIREA Postings" = "pct_green",
                                        "AIREA Jobs / 1,000 Residents" = "per1000"
                                      )
                          ),
-                         selectizeInput("search_term", 
-                                        tags$h3("Search by Institution:"),
+                         selectizeInput("search_term",
+                                        div(style = "margin-top: 15px; margin-left: -35px;",
+                                            h3("Search by Institution:",
+                                               create_info_button("map_institution_info", "")
+                                            )),
                                         choices = NULL, 
                                         options = list(), 
                                         width="100%"
@@ -184,7 +201,7 @@ navbarPage(
            )
   ),
   
-           
+  
   
   
   
@@ -232,7 +249,9 @@ navbarPage(
                             style = "flex: 1; min-width: 200px; max-width: 32%;",
                             selectizeInput(
                               inputId = "supply_search",
-                              label = tags$strong("All institutions"),
+                              label = tags$strong("All institutions", 
+                                                  create_info_button("supply_search_info", "")
+                              ),
                               choices = NULL,
                               options = list(placeholder = 'Search institution...', create = FALSE)
                             )
@@ -245,7 +264,9 @@ navbarPage(
                             style = "flex: 1; min-width: 200px; max-width: 32%;",
                             selectInput(
                               inputId = "supply_leader_airea",
-                              label = tags$strong("Top 50 colleges by total AIREA credentials (mean per year)"),
+                              label = tags$strong("Top 50 colleges by total AIREA credentials (mean per year)",
+                                                  create_info_button("supply_leader_airea_info", "")
+                              ),
                               choices = NULL
                             )
                           ),
@@ -257,7 +278,9 @@ navbarPage(
                             style = "flex: 1; min-width: 200px max-width: 32%;",
                             selectInput(
                               inputId = "supply_leader_pct",
-                              label = tags$strong("Top 50 colleges by AIREA % of credentials (mean per year)"),
+                              label = tags$strong("Top 50 colleges by AIREA % of credentials (mean per year)",
+                                                  create_info_button("supply_leader_pct_info", "")
+                              ),
                               choices = NULL
                             )
                           )
@@ -276,16 +299,19 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_degrees_by_institution", height = "400px"),
+                    girafeOutput("supply_degrees_by_institution", width = "100%"),
                     br(),
                     div(
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_metric",
-                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                        label = h3("Select:", style = "margin: -15px;",
+                                   create_info_button("supply_metric_info", "")
+                        ),
                         choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
                         selected = "airea",
-                        inline = FALSE
+                        inline = FALSE,
+                        width = "90%"
                       )
                     ),
                     br()
@@ -300,27 +326,34 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("supply_cip_award_bar", height = "500px"),
+                    girafeOutput("supply_cip_award_bar", width = "100%"),
                     br(),
                     div(
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_bar_style",
-                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                        label = h3("Select view:", style = "margin: -15px;",
+                                   create_info_button("supply_bar_style_info", "")
+                        ),
                         choices = c(
                           "Share of Award Types within Programs" = "filled",
                           "Number of Credentials by Program" = "single"
                         ),
                         selected = "filled",
-                        inline = FALSE
+                        inline = FALSE,
+                        width = "90%"
                       ),
+                      
                       br(),
+                      
                       selectInput(
                         inputId = "supply_bar_year",
-                        label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        label = h3("Select year:", style = "margin: -15px;",
+                                   create_info_button("supply_bar_year_info", "")
+                        ),
                         choices = c("Overall", 2010:2023),
                         selected = "Overall",
-                        width = "60%"
+                        width = "40%"
                       )
                     ),
                     br()
@@ -356,14 +389,14 @@ navbarPage(
                         br(),
                         icon("hand-point-up"),
                         "Search for a commuting zone to see its top AIREA job postings, education requirements, and trends over time in the visualizations below."
-                        ),
+                      ),
                       
                       br(),
                       
                       
                       
                       div(
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
+                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:100%; margin:0 auto;",
                         
                         h3("Search By:", style = "text-align: center;"),
                         br(),
@@ -375,9 +408,11 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectizeInput(
                               inputId = "cz_search",
-                              label = tags$strong("Commuting zone"),
+                              label = tags$strong("Commuting zone", 
+                                                  create_info_button("cz_search_info", "")
+                              ),
                               choices = NULL,
-                              options = list(placeholder = 'Search commuting zone...', create = FALSE),
+                              options = list(placeholder = 'Search commuting zone...', create = FALSE)
                             )
                           ),
                           div(
@@ -388,7 +423,9 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_posts",
-                              label = tags$strong("Top 50 zones by total AIREA postings (mean per year)"),
+                              label = tags$strong("Top 50 zones by total AIREA postings (mean per year)", 
+                                                  create_info_button("cz_leader_posts_info", "")
+                              ),
                               choices = NULL
                             )
                           ),
@@ -400,7 +437,9 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_pct",
-                              label = tags$strong("Top 50 zones by AIREA % of all postings (mean per year)"),
+                              label = tags$strong("Top 50 zones by AIREA % of all postings (mean per year)", 
+                                                  create_info_button("cz_leader_pct_info", "")
+                              ),
                               choices = NULL
                             )
                           ),
@@ -412,7 +451,9 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectInput(
                               inputId = "cz_leader_per1000",
-                              label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents (mean per year)"),
+                              label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents (mean per year)", 
+                                                  create_info_button("cz_leader_per1000_info", "")
+                              ),
                               choices = NULL
                             )
                           )
@@ -429,13 +470,16 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_cz_trend", height = "400px"),
+                    girafeOutput("demand_cz_trend", width = "100%"),
                     br(),
                     div(
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
+                      
                       radioButtons(
                         inputId = "demand_metric",
-                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                        label = h3("Select:", style = "margin: -15px;", 
+                                   create_info_button("demand_metric_info", "")
+                        ),
                         choices = c(
                           "Number of AIREA Job Postings" = "airea",
                           "AIREA % of All Postings" = "pct",
@@ -456,39 +500,47 @@ navbarPage(
            fluidRow(
              column(12,
                     br(),
-                    girafeOutput("demand_soc_edreq_bar", height = "600px"),
+                    girafeOutput("demand_soc_edreq_bar", width = "100%"),
                     br(),
                     div(
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:60%; margin:0 auto;",
+                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
                       radioButtons(
                         inputId = "demand_bar_style",
-                        label = span("Select:", style = "font-size:1.25em; font-weight:700; color:#0065a4;"),
+                        label = h3("Select:", style = "margin: -15px;", 
+                                   create_info_button("demand_bar_style_info", "")
+                        ),
                         choices = c(
                           "Share of Job Postings" = "filled",
                           "Number of Job Postings" = "single"
                         ),
                         selected = "single",
                         inline = FALSE,
-                        width = "60%"
+                        width = "90%"
                       ),
+                      
                       br(),
                       numericInput(
                         inputId = "num_socs",
-                        label = span("Number of Occupations to Display:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        label = h3("Number of Occupations to Display:", style = "margin: -15px;", 
+                                   create_info_button("num_socs_info", "")
+                        ),
                         value = 10,
                         min = 1,
                         max = 30,
                         step = 1,
-                        width = "60%"
+                        width = "50%"
                       ),
+                      
                       br(),
                       selectInput(
                         inputId = "demand_bar_year",
-                        label = span("Year:", style = "font-size:1.0em; font-weight:700; color:#0065a4;"),
+                        label = h3("Year:", style = "margin: -15px;", 
+                                   create_info_button("demand_bar_year_info", "")
+                        ),
                         choices = c("Overall", 2010:2023),
                         selected = "Overall",
-                        width = "60%"
+                        width = "50%"
                       ),
                       br()
                     ),
@@ -519,7 +571,7 @@ navbarPage(
              column(12,
                     div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      p("The AIERA Data Explorer's interactive maps and data visualizations show how community college AIREA program completions align with nearby job postings by commuting zone.")
+                      p("The AIREA Data Explorer's interactive maps and data visualizations show how community college AIREA program completions align with nearby job postings by commuting zone.")
                     ),
                     div(
                       style = "background-color: #ffffff; padding: 20px; border-radius: 6px;",
@@ -588,21 +640,21 @@ navbarPage(
                             tags$a(href="https://nces.ed.gov/ipeds", 
                                    "Integrated Postsecondary Education Data System (IPEDS)"), 
                             " degree completions and institutional directory files covering the years 2010-2023. Building from the 283 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"),
-                            tags$ul(
-                              tags$li("(01) Agriculture and Agricultural Operations"),
-                              tags$li("(02) Natural Resources and Conservation"),
-                              tags$li("(03) Architecture"),
-                              tags$li("(14) Engineering"),
-                              tags$li("(15) Engineering Technologies and Technicians"),
-                              tags$li("(26) Biological Sciences"),
-                              tags$li("(40) Physical Sciences"),
-                              tags$li("(41) Science Technologies and Technicians"),
-                              tags$li("(46) Construction Trades"),
-                              tags$li("(47) Mechanic and Repair Technologies and Technicians"),
-                              tags$li("(48) Precision Production"),
-                              tags$li("(49) Transportation and Materials Moving")
-                            ),
-                            p("We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional 6-digit CIP codes that did not align with the green economy or with skills needed to sustain it."),
+                          tags$ul(
+                            tags$li("(01) Agriculture and Agricultural Operations"),
+                            tags$li("(02) Natural Resources and Conservation"),
+                            tags$li("(03) Architecture"),
+                            tags$li("(14) Engineering"),
+                            tags$li("(15) Engineering Technologies and Technicians"),
+                            tags$li("(26) Biological Sciences"),
+                            tags$li("(40) Physical Sciences"),
+                            tags$li("(41) Science Technologies and Technicians"),
+                            tags$li("(46) Construction Trades"),
+                            tags$li("(47) Mechanic and Repair Technologies and Technicians"),
+                            tags$li("(48) Precision Production"),
+                            tags$li("(49) Transportation and Materials Moving")
+                          ),
+                          p("We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional 6-digit CIP codes that did not align with the green economy or with skills needed to sustain it."),
                           
                           br(),
                           p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. The resulting dataset includes 429 distinct 6-digit CIP codes (degree) programs."),
@@ -621,8 +673,8 @@ navbarPage(
                           title = h4("What Institutions and Award Types are Included in the AIREA Data Explorer?"),
                           value = "qa3",
                           p("The dataset includes 920 institutions ",
-                          tags$a(href="https://ccrc.tc.columbia.edu/easyblog/shifting-sectors-community-colleges-undercounting.html", "classified by CCRC as community colleges"),
-                          " based on their funding sources and their provision (primarily, but not exclusively) of sub-baccalaureate degrees and certificates."),
+                            tags$a(href="https://ccrc.tc.columbia.edu/easyblog/shifting-sectors-community-colleges-undercounting.html", "classified by CCRC as community colleges"),
+                            " based on their funding sources and their provision (primarily, but not exclusively) of sub-baccalaureate degrees and certificates."),
                           
                           br(),
                           p("Using IPEDS, credentials are classified into four award types:",
@@ -648,9 +700,9 @@ navbarPage(
                           p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both degree completions (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
                         )
                       )
-                          
-                          
-                          
+                      
+                      
+                      
                     )
              )
            ),
@@ -662,7 +714,12 @@ navbarPage(
              column(12,
                     tags$div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
-                      tags$h3("Institutions Table"),
+                      div(
+                        h3("Institutions Table", 
+                           style = "margin: -10px;",
+                           create_info_button("institutions_table_info", "")
+                      )),
+                      
                       tags$br(),
                       downloadButton("download_supply_table", "Download CSV", class = "btn btn-primary", style = "margin-bottom:10px;"),
                       tags$style(HTML(
@@ -672,33 +729,42 @@ navbarPage(
              )
            ),
            
+           
+           
            br(),
            hr(),
            fluidRow(
              column(12,
                     tags$div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
-                      tags$h3("Job Postings Table (Commuting Zones)"),
-                      tags$br(),
-                      downloadButton("download_demand_table", "Download CSV", class = "btn btn-primary", style = "margin-bottom:10px;"),
-                      tags$style(HTML(
-                        "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
-                      DT::dataTableOutput("demand_table")
+                      div(
+                        h3("Job Postings Table (Commuting Zones)", 
+                           style = "margin: -10px;",
+                           create_info_button("job_postings_table_info", "")
+                    )),
+                    
+                    tags$br(),
+                    downloadButton("download_demand_table", "Download CSV", class = "btn btn-primary", style = "margin-bottom:10px;"),
+                    tags$style(HTML(
+                      "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
+                    DT::dataTableOutput("demand_table")
                     )
              )
            ),
-          br(),
-          fluidRow(
-            column(12,
-                   tags$div(
-                     style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:60%; margin-left:auto; margin-right:auto;",
-                     tags$h4("Research Data Access"),
-                     p(
-                       "Researchers and analysts can access underlying datasets via our OSF repository:",
-                       tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
-                     )
-                   )
-            )
-          )
+  
+  
+  br(),
+  fluidRow(
+    column(12,
+           tags$div(
+             style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:50%; margin-left:auto; margin-right:auto;",
+             h3("Research Data Access:", style = "text-align: center;"),
+             p(
+               "Researchers and analysts can access underlying datasets via our OSF repository:",
+               tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
+             )
+           )
+    )
   )
+)
 )
