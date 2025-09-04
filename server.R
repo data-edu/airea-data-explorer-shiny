@@ -28,6 +28,24 @@ label_to_factor <- function(x) {
   }
 }
 
+# Map IPEDS award level codes to custom credential type labels
+map_award_level <- function(x) {
+  x_chr <- as.character(x)
+  x_num <- suppressWarnings(as.integer(x_chr))
+  lookup <- c(
+    "1"  = "<1 Year Award",
+    "2"  = "1–2 Year Cert",
+    "3"  = "Associate’s",
+    "4"  = "2–4 Year Cert",
+    "5"  = "Bachelor’s",
+    "20" = "<12 Week Cert",
+    "21" = "12W–1Y Cert"
+  )
+  mapped <- unname(lookup[as.character(x_num)])
+  mapped[is.na(mapped)] <- "Other"
+  factor(mapped, levels = c(unname(lookup), "Other"))
+}
+
 # CIP Group mapping (by first two digits of CIP code)
 get_cip_group <- function(cip_code) {
   code_chr <- gsub("[^0-9]", "", as.character(cip_code))
@@ -586,7 +604,7 @@ server <- function(input, output, session) {
       collect() %>%
       filter(total_airea_completions > 0) %>%
       mutate(
-        award_level = label_to_factor(award_level),
+        award_level = map_award_level(award_level),
         award_level = forcats::fct_rev(award_level),
         cip_group = get_cip_group(cip)
       ) %>%
