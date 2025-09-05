@@ -167,7 +167,12 @@ navbarPage(
                     ),
                     
                     
-                    div(id="map", style="height:600px; width:100%;")
+                    tags$div(
+                      id = "map-wrap",
+                      style = "height:600px; width:100%; position:relative;",
+                      tags$div(id = "map", style = "height:100%; width:100%; visibility:hidden;"),
+                      tags$div(id = "map-splash")  
+                    )
              )
            ),
            
