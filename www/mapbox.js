@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ──────────────────────────────────────────────────────────────────────────
   const czBreaks = {
     airea_job_posting: [1000, 5000, 20000, 50000],
-    pct_green:          [20, 25, 30, 35],
+    pct_green:          [14, 17, 20, 25],
     per1000:            [30,   50,    80,   120]
   };
   const czColors = {
