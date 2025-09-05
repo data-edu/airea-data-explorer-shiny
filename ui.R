@@ -599,12 +599,16 @@ navbarPage(
            
            
            h2("About the AIREA Data Explorer"),
-           
+
+
+
            fluidRow(
              column(12,
                     div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      p("The AIREA Data Explorer's interactive maps and data visualizations show how community college AIREA program completions align with nearby job postings by commuting zone.")
+                      p("Explore frequently asked questions about AIREA occupations and credentials."),
+                      br(),
+                      p("Download summary tables or research data."),
                     ),
                     div(
                       style = "background-color: #ffffff; padding: 20px; border-radius: 6px;",
@@ -748,7 +752,7 @@ navbarPage(
                     tags$div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
                       div(
-                        h3("Institutions Table", 
+                        h3("AIREA Community Colleges Summary",
                            style = "margin: -10px;",
                            create_info_button("institutions_table_info", "")
                       )),
@@ -771,7 +775,7 @@ navbarPage(
                     tags$div(
                       style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
                       div(
-                        h3("Job Postings Table (Commuting Zones)", 
+                        h3("AIREA Job Postings by Commuting Zone",
                            style = "margin: -10px;",
                            create_info_button("job_postings_table_info", "")
                     )),

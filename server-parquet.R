@@ -35,13 +35,13 @@ utils::globalVariables(c(
 mapsupply <- readRDS("data/mapsupply.rds")
 
 # Tab 2 table source (replace interactive table with this CSV)
-supply_table_df <- read_csv("data/supply-table.csv", show_col_types = FALSE)
+supply_table_df <- read_csv("data/supply-table-for-app.csv", show_col_types = FALSE)
 
 
 # Ensure pct_airea_completions exists (calculate if missing)
 if (!"pct_airea_completions" %in% names(supply_table_df)) {
   supply_table_df <- supply_table_df %>%
-    mutate(pct_airea_completions = ifelse(mean_completions > 0, mean_airea_completions / mean_completions, 0))
+    mutate(pct_airea_completions = ifelse(tot_completions > 0, tot_airea_completions / tot_completions, 0))
 }
 
 # National averages for Tab 2 (Degree Completions) and Tab 3 (Job Postings)
@@ -73,7 +73,7 @@ onStop(function() {
   try(dbDisconnect(con_demand, shutdown = TRUE), silent = TRUE)
 })
 
-cz_table_df <- read_csv("data/cz-summary-table.csv")
+cz_table_df <- read_csv("data/demand-table-for-app.csv")
 
 # ==============================================================================
 # App color palette and plot theme (match CSS)

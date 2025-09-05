@@ -40,7 +40,7 @@ supply %>%
             cz_label = first(cz_label)) %>% 
   mutate(pct_airea_completions = mean_airea_completions/mean_completions)
 
-write_csv(supply_table, "prep/supply-table.csv")
+# write_csv(supply_table, "prep/supply-table.csv")  # No longer needed - using supply-table-for-app.csv
 
 open_ds <- open_dataset("prep/supply_partitioned", format = "parquet")
 
@@ -142,8 +142,8 @@ cz_table <- cz_summary %>%
     `CZ population`   = cz_population
   )
 
-cz_table %>% 
-  write_csv("prep/cz-summary-table.csv")
+# cz_table %>%
+#   write_csv("prep/cz-summary-table.csv")  # No longer needed - using demand-table-for-app.csv
 
 demand_ds <- open_dataset("prep/demand_partitioned", format = "parquet")
 
