@@ -23,12 +23,12 @@ suppressPackageStartupMessages({
 data_dir <- "data"
 
 # ------------------------------------------------------------------------------
-# 1) Supply leaders from supply-table.csv
+# 1) Supply leaders from supply-table-for-app.csv
 # ------------------------------------------------------------------------------
 
-message("[1/3] Building supply leaders from supply-table.csv ...")
+message("[1/3] Building supply leaders from supply-table-for-app.csv ...")
 
-supply_table_path <- file.path(data_dir, "supply-table.csv")
+supply_table_path <- file.path(data_dir, "supply-table-for-app.csv")
 stopifnot(file.exists(supply_table_path))
 
 supply_tbl_df <- readr::read_csv(supply_table_path, show_col_types = FALSE)
@@ -36,15 +36,15 @@ supply_tbl_df <- readr::read_csv(supply_table_path, show_col_types = FALSE)
 # Ensure column names we need exist and types are numeric
 if (!"pct_airea_completions" %in% names(supply_tbl_df)) {
   supply_tbl_df <- supply_tbl_df %>%
-    mutate(pct_airea_completions = ifelse(mean_completions > 0,
-                                          mean_airea_completions / mean_completions,
+    mutate(pct_airea_completions = ifelse(tot_completions > 0,
+                                          tot_airea_completions / tot_completions,
                                           0))
 }
 
 # Top by mean AIREA completions (keep all rows; app will slice to 150)
 leaders_supply_airea <- supply_tbl_df %>%
-  select(instnm, mean_airea_completions) %>%
-  arrange(desc(mean_airea_completions))
+  select(instnm, tot_airea_completions) %>%
+  arrange(desc(tot_airea_completions))
 
 # Top by pct AIREA completions
 leaders_supply_pct <- supply_tbl_df %>%

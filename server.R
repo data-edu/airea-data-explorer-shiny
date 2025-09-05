@@ -265,7 +265,7 @@ utils::globalVariables(c(
 mapsupply <- readRDS("data/mapsupply.rds")
 
 # Tab 2 table source (replace interactive table with this CSV)
-supply_table_df <- read_csv("data/supply-table.csv", show_col_types = FALSE)
+supply_table_df <- read_csv("data/supply-table-for-app.csv", show_col_types = FALSE)
 
 # Precomputed leader lists (optional). Fallback logic below will compute if missing
 leaders_supply_airea <- tryCatch(read_csv("data/leaders_supply_airea.csv", show_col_types = FALSE), error = function(e) NULL)
@@ -294,7 +294,7 @@ onStop(function() {
 })
 
 # Tab 3 table source (CSV summary for CZs)
-cz_table_df <- read_csv("data/cz-summary-table.csv")
+cz_table_df <- read_csv("data/demand-table-for-app.csv")
 
 # Precomputed CZ leaders (optional)
 leaders_cz <- tryCatch(read_csv("data/leaders_cz.csv", show_col_types = FALSE), error = function(e) NULL)
@@ -513,10 +513,10 @@ server <- function(input, output, session) {
       select(
         `Institution` = instnm,
         `Commuting Zone` = cz_label,
-        `Mean Completions (per year)` = mean_completions,
-        `Mean AIREA Completions (per year)` = mean_airea_completions,
+        `Mean Completions (per year)` = tot_completions,
+        `Mean AIREA Completions (per year)` = tot_airea_completions,
         `AIREA%` = pct_airea_completions,
-        `Mean Enrollment (per year)` = mean_students_enrolled,
+        `Mean Enrollment (per year)` = first_students_enrolled,
         `Rural` = rural,
         `Tribal` = tribal
       ) %>%
@@ -525,9 +525,7 @@ server <- function(input, output, session) {
         `AIREA%` = paste0(round(`AIREA%_num`, 2), "%"),
         `Mean Completions (per year)` = scales::comma(round(`Mean Completions (per year)`)),
         `Mean AIREA Completions (per year)` = scales::comma(round(`Mean AIREA Completions (per year)`)),
-        `Mean Enrollment (per year)` = scales::comma(round(`Mean Enrollment (per year)`)),
-        `Rural` = ifelse(is.na(`Rural`) | `Rural` == 0, "No", "Yes"),
-        `Tribal` = ifelse(is.na(`Tribal`) | `Tribal` == 1, "No", "Yes")
+        `Mean Enrollment (per year)` = scales::comma(round(`Mean Enrollment (per year)`))
       )
     
     DT::datatable(
@@ -547,16 +545,16 @@ server <- function(input, output, session) {
   
   # Download handler for supply table (export the displayed data)
   output$download_supply_table <- downloadHandler(
-    filename = function() paste0("airea_institutions_", Sys.Date(), ".csv"),
+    filename = function() paste0("airea_community_colleges_", Sys.Date(), ".csv"),
     content = function(file) {
       df <- supply_table_df %>%
         dplyr::select(
           Institution = instnm,
           `Commuting Zone` = cz_label,
-          `Mean Completions (per year)` = mean_completions,
-          `Mean AIREA Completions (per year)` = mean_airea_completions,
+          `Mean Completions (per year)` = tot_completions,
+          `Mean AIREA Completions (per year)` = tot_airea_completions,
           `AIREA%` = pct_airea_completions,
-          `Mean Enrollment (per year)` = mean_students_enrolled,
+          `Mean Enrollment (per year)` = first_students_enrolled,
           Rural = rural,
           Tribal = tribal
         ) %>%
@@ -569,7 +567,6 @@ server <- function(input, output, session) {
   
   # Institution time series plot (DuckDB)
   output$supply_degrees_by_institution <- renderGirafe({
-    validate(need(!is.null(selected_institution()), "Select an institution above to view trends."))
     
     my_inst <- selected_institution()
     
@@ -649,7 +646,6 @@ server <- function(input, output, session) {
   
   # CIP by award level stacked bar (most recent year for selected institution) using DuckDB
   output$supply_cip_award_bar <- renderGirafe({
-    validate(need(!is.null(selected_institution()), "Select an institution above to view credentials awarded by CIP."))
     
     my_inst <- selected_institution()
     
@@ -827,119 +823,63 @@ server <- function(input, output, session) {
   
   # All CZs table: display the CSV contents directly
   output$demand_table <- DT::renderDT({
-      df <- cz_table_df
-      # Identify label and percent columns if present
-      lower_names <- tolower(names(df))
-      label_idx <- match(c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel"), lower_names)
-      label_idx <- label_idx[!is.na(label_idx)]
-      pct_idx <- match(c("airea %", "airea%", "pct_airea", "pct_airea_posts", "airea pct", "airea_percentage"), lower_names)
-      pct_idx <- pct_idx[!is.na(pct_idx)]
-      
-      # Reorder columns to put label first if found
-      if (length(label_idx) > 0) {
-        first_col <- label_idx[1]
-        df <- df[, c(first_col, setdiff(seq_len(ncol(df)), first_col)), drop = FALSE]
-        names(df)[1] <- "Commuting Zone"
-      }
-      
-      # Format numeric columns
-      for (col in names(df)) {
-        if (is.numeric(df[[col]])) {
-          is_pct_col <- length(pct_idx) > 0 && match(tolower(col), lower_names[pct_idx], nomatch = 0) > 0
-          if (is_pct_col) {
-            vals <- df[[col]]
-            vals_scaled <- if (all(vals <= 1, na.rm = TRUE)) vals * 100 else vals
-            df[[col]] <- paste0(round(vals_scaled, 2), "%")
-          } else if (all(df[[col]] == floor(df[[col]]), na.rm = TRUE)) {
-            df[[col]] <- scales::comma(df[[col]])
-          } else {
-            df[[col]] <- round(df[[col]], 2)
-          }
-        }
-      }
-      
-      order_list <- list()
-      if (length(pct_idx) > 0) {
-        pct_col_name <- names(cz_table_df)[pct_idx[1]]
-        pct_display_idx <- match(pct_col_name, names(df)) - 1  # DataTables is 0-based
-        if (!is.na(pct_display_idx) && pct_display_idx >= 0) {
-          order_list <- list(list(pct_display_idx, 'desc'))
-        }
-      }
-      
-      # Rename common columns for readability if present
-      col_map <- c(
-        total_posts = "Mean Total Job Postings",
-        "tot job posts" = "Mean Total Job Postings",
-        airea_posts = "Mean AIREA Job Postings",
-        "airea job posts" = "Mean AIREA Job Postings",
-        airea_percentage = "AIREA%",
-        posts_per_1000 = "Mean AIREA postings/1,000 residents",
-        "posts per 1,000" = "Mean AIREA postings/1,000 residents",
-        posts_per_100k = "Mean Posts per 100,000",
-        population = "Commuting Zone Population"
+    table_display <- cz_table_df %>%
+      select(
+        `Commuting Zone` = cz_label,
+        `Year` = year,
+        `Total Job Postings` = posts_total,
+        `AIREA Job Postings` = posts_airea,
+        `Commuting Zone Population` = cz_pop_year,
+        `AIREA%` = airea_pct_posts,
+        `AIREA Postings per 1,000 Residents` = posts_per_1000
+      ) %>%
+      mutate(
+        `AIREA%_num` = `AIREA%` * 100,
+        `AIREA%` = paste0(round(`AIREA%_num`, 2), "%"),
+        `Total Job Postings` = scales::comma(round(`Total Job Postings`)),
+        `AIREA Job Postings` = scales::comma(round(`AIREA Job Postings`)),
+        `Commuting Zone Population` = scales::comma(round(`Commuting Zone Population`)),
+        `AIREA Postings per 1,000 Residents` = round(`AIREA Postings per 1,000 Residents`, 1)
       )
-      for (nm in names(col_map)) {
-        idx <- which(tolower(names(df)) == nm)
-        if (length(idx) == 1) names(df)[idx] <- col_map[[nm]]
-      }
-      
-      # If a per-1,000 column exists, format with commas and one decimal
-      per1k_idx <- match(c("posts per 1,000", "posts per 1000", "posts_per_1000"), tolower(names(cz_table_df)))
-      per1k_idx <- per1k_idx[!is.na(per1k_idx)]
-      if (length(per1k_idx) > 0) {
-        raw_name <- names(cz_table_df)[per1k_idx[1]]
-        display_idx <- match(raw_name, names(df))
-        if (!is.na(display_idx) && is.numeric(df[[display_idx]])) {
-          df[[display_idx]] <- scales::comma_format(accuracy = 0.1)(df[[display_idx]])
-        }
-      }
-      
-      DT::datatable(
-        df,
-        selection = list(mode = 'single', selected = 1),
-        options = list(
-          pageLength = 10,
-          lengthChange = FALSE,
-          order = order_list
-        ),
-        style = "bootstrap",
-        rownames = FALSE
-      )
+
+    DT::datatable(
+      table_display,
+      selection = list(mode = 'single', selected = 1),
+      options = list(
+        pageLength = 10,
+        lengthChange = FALSE,
+        order = list(list(0, 'asc')),  # Order by Commuting Zone ascending
+        columnDefs = list(list(visible = FALSE, targets = c(7)))  # Hide AIREA%_num column
+      ),
+      style = "bootstrap",
+      rownames = FALSE,
+      escape = FALSE
+    )
   })
   
   # Download handler for demand table (export the displayed data)
   output$download_demand_table <- downloadHandler(
-    filename = function() paste0("airea_cz_job_postings_", Sys.Date(), ".csv"),
+    filename = function() paste0("airea_job_postings_by_commuting_zone_", Sys.Date(), ".csv"),
     content = function(file) {
-      df <- cz_table_df
-      lower_names <- tolower(names(df))
-      label_idx <- match(c("cz_label", "cz label", "commuting zone", "commuting_zone", "czlabel"), lower_names)
-      label_idx <- label_idx[!is.na(label_idx)]
-      if (length(label_idx) > 0) {
-        first_col <- label_idx[1]
-        df <- df[, c(first_col, setdiff(seq_len(ncol(df)), first_col)), drop = FALSE]
-        names(df)[1] <- "Commuting Zone"
-      }
-      # Convert percent columns to 0-100
-      pct_idx <- match(c("airea %", "airea%", "pct_airea", "pct_airea_posts", "airea pct", "airea_percentage"), lower_names)
-      pct_idx <- pct_idx[!is.na(pct_idx)]
-      if (length(pct_idx) > 0) {
-        for (i in pct_idx) {
-          nm <- names(cz_table_df)[i]
-          if (nm %in% names(df) && is.numeric(df[[nm]])) {
-            vals <- df[[nm]]
-            df[[nm]] <- ifelse(is.na(vals), NA, ifelse(vals <= 1, vals * 100, vals))
-          }
-        }
-      }
+      df <- cz_table_df %>%
+        dplyr::select(
+          `Commuting Zone` = cz_label,
+          `Year` = year,
+          `Total Job Postings` = posts_total,
+          `AIREA Job Postings` = posts_airea,
+          `Commuting Zone Population` = cz_pop_year,
+          `AIREA%` = airea_pct_posts,
+          `AIREA Postings per 1,000 Residents` = posts_per_1000
+        ) %>%
+        dplyr::mutate(
+          `AIREA%` = round(`AIREA%` * 100, 2)
+        )
       readr::write_csv(df, file)
     }
   )
   
   # CZ time series plot (with metric toggle) using DuckDB
   output$demand_cz_trend <- renderGirafe({
-    validate(need(!is.null(selected_cz()), "Select a commuting zone above to view trends."))
     
     my_cz <- selected_cz()
     
