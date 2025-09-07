@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const instSection = document.createElement("div");
     instSection.id = "legend-inst";
     instSection.innerHTML = `
-      <h4 style="margin:10px 0 5px;">AIREA Degree Rate</h4>
+      <h4 style="margin:10px 0 5px;">AIREA Credential Rate</h4>
       <div><span style="background:rgba(178,34,34,0.5);width:8px;height:8px;
                    display:inline-block;border-radius:50%;margin-right:5px;vertical-align:middle;"></span>
         Low < 25%</div>
@@ -320,10 +320,10 @@ function loadInstituteDataForYear(year) {
 
           const html = `
             <strong>${props.instnm}</strong><br>
-            Comuting Zone: ${props.cz_label}<br>
-            AIREA Degree: ${(+props.inst_green_cmplt_tot).toLocaleString()}<br>
-            Total Degree: ${(+props.inst_cmplt_tot).toLocaleString()}<br>
-            % AIREA Degrees: ${(props.inst_perc_green_tot*100).toFixed(1)}%
+            Commuting Zone: ${props.cz_label}<br>
+            AIREA Credentials: ${(+props.inst_green_cmplt_tot).toLocaleString()}<br>
+            Total Credentials: ${(+props.inst_cmplt_tot).toLocaleString()}<br>
+            % AIREA Credentials: ${(props.inst_perc_green_tot*100).toFixed(1)}%
           `;
 
           instHoverPopup
