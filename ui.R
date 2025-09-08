@@ -161,7 +161,7 @@ navbarPage(
                         br(),
                         "Curious to see AIREA job postings represented in different ways? ",
                         icon("hand-point-up"),
-                        "Use the color by filter to see the raw number of AIREA job postings, the percent of all job postings that are in AIREA fields, or the number of AIREA job postings per 1000 residents."
+                        "Use the color by filter to see the raw number of AIREA job postings, the percent of all job postings that are in AIREA fields, or the number of AIREA job postings per 1,000 residents."
                       )
                       
                     ),
