@@ -358,7 +358,7 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_bar_style",
-                        label = h3("Select View:", style = "margin: -15px; text-align: center;",
+                        label = h3("Select:", style = "margin: -15px; text-align: center;",
                                    create_info_button("supply_bar_style_info", "")
                         ),
                         choices = c(
