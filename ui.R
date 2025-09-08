@@ -167,7 +167,12 @@ navbarPage(
                     ),
                     
                     
-                    div(id="map", style="height:600px; width:100%;")
+                    tags$div(
+                      id = "map-wrap",
+                      style = "height:600px; width:100%; position:relative;",
+                      tags$div(id = "map", style = "height:100%; width:100%; visibility:hidden;"),
+                      tags$div(id = "map-splash")  
+                    )
              )
            ),
            
@@ -326,13 +331,12 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_metric",
-                        label = h3("Select:", style = "margin: -15px;",
+                        label = h3("Select:", style = "margin: -15px; text-align: center;",
                                    create_info_button("supply_metric_info", "")
                         ),
                         choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
                         selected = "airea",
-                        inline = FALSE,
-                        width = "90%"
+                        inline = FALSE
                       )
                     ),
                     br()
@@ -354,23 +358,22 @@ navbarPage(
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       radioButtons(
                         inputId = "supply_bar_style",
-                        label = h3("Select view:", style = "margin: -15px;",
+                        label = h3("Select View:", style = "margin: -15px; text-align: center;",
                                    create_info_button("supply_bar_style_info", "")
                         ),
                         choices = c(
                           "Share of Award Types within Programs" = "filled",
-                          "Number of Credentials by Program" = "single"
+                          "Choose Number of Credentials by Program" = "single"
                         ),
                         selected = "single",
-                        inline = FALSE,
-                        width = "90%"
+                        inline = FALSE
                       ),
                       
                       br(),
                       
                       selectInput(
                         inputId = "supply_bar_year",
-                        label = h3("Select year:", style = "margin: -15px;",
+                        label = h3("Select Year:", style = "margin: -15px;",
                                    create_info_button("supply_bar_year_info", "")
                         ),
                         choices = c("Overall", 2010:2023),
@@ -431,7 +434,7 @@ navbarPage(
                             style = "flex: 1; min-width: 150px; max-width: 24%;",
                             selectizeInput(
                               inputId = "cz_search",
-                              label = tags$strong("All commuting zone", 
+                              label = tags$strong("All commuting zones", 
                                                   create_info_button("cz_search_info", "")
                               ),
                               choices = NULL,
@@ -502,7 +505,7 @@ navbarPage(
                       
                       radioButtons(
                         inputId = "demand_metric",
-                        label = h3("Select:", style = "margin: -15px;", 
+                        label = h3("Select:", style = "margin: -15px; text-align: center;", 
                                    create_info_button("demand_metric_info", "")
                         ),
                         choices = c(
@@ -533,7 +536,7 @@ navbarPage(
                       
                       radioButtons(
                         inputId = "demand_bar_style",
-                        label = h3("Select:", style = "margin: -15px;", 
+                        label = h3("Select:", style = "margin: -15px; text-align: center;", 
                                    create_info_button("demand_bar_style_info", "")
                         ),
                         choices = c(
@@ -541,15 +544,14 @@ navbarPage(
                           "Number of Job Postings" = "single"
                         ),
                         selected = "single",
-                        inline = FALSE,
-                        width = "90%"
+                        inline = FALSE
                       ),
                       
                       br(),
                       div(class = "selector-box",
                         radioButtons(
                           inputId = "num_socs",
-                          label = h3("Number of Top Occupations to Display:", style = "margin: -15px;",
+                          label = h3("Choose Number of Top Occupations to Display:", style = "margin: -15px;",
                                      create_info_button("num_socs_info", "")
                           ),
                           choices = c(
@@ -568,7 +570,7 @@ navbarPage(
                       br(),
                       selectInput(
                         inputId = "demand_bar_year",
-                        label = h3("Year:", style = "margin: -15px;", 
+                        label = h3("Select Year:", style = "margin: -15px; text-align: center;", 
                                    create_info_button("demand_bar_year_info", "")
                         ),
                         choices = c("Overall", 2010:2023),
@@ -605,24 +607,20 @@ navbarPage(
            fluidRow(
              column(12,
                     div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
-                      p("Explore frequently asked questions about AIREA occupations and credentials."),
-                      br(),
-                      p("Download summary tables or research data."),
-                    ),
-                    div(
                       style = "background-color: #ffffff; padding: 20px; border-radius: 6px;",
                       
                       hr(),
                       h3("Frequently Asked Questions"),
                       br(),
+                      p(em("Explore frequently asked questions about AIREA occupations and credentials.")),
                       
                       
                       
+                      br(),
                       bsCollapse(
                         id = "collapse_panel",
                         bsCollapsePanel(
-                          title = h4("What are AIREA jobs?"),
+                          title = "What are AIREA jobs?",
                           value = "qa1",
                           p("To identify Advanced Infrastructure, Energy, and Agriculture (AIREA) occupations, we began with the ",
                             tags$a(href="https://www.onetcenter.org/reports/Green.html", 
@@ -671,7 +669,7 @@ navbarPage(
                       bsCollapse(
                         id = "collapse_panel",
                         bsCollapsePanel(
-                          title = h4("What are AIREA Credentials?"),
+                          title = "What are AIREA Credentials?",
                           value = "qa2",
                           p("For AIREA credentials, we used the U.S. Department of Education's ",
                             tags$a(href="https://nces.ed.gov/ipeds", 
@@ -707,7 +705,7 @@ navbarPage(
                       bsCollapse(
                         id = "collapse_panel",
                         bsCollapsePanel(
-                          title = h4("What Institutions and Award Types are Included in the AIREA Data Explorer?"),
+                          title = "What Institutions and Award Types are Included in the AIREA Data Explorer?",
                           value = "qa3",
                           p("The dataset includes 920 institutions ",
                             tags$a(href="https://ccrc.tc.columbia.edu/easyblog/shifting-sectors-community-colleges-undercounting.html", "classified by CCRC as community colleges"),
@@ -732,9 +730,71 @@ navbarPage(
                       bsCollapse(
                         id = "collapse_panel",
                         bsCollapsePanel(
-                          title = h4("What is a Commuting Zone?"),
+                          title = "What is a Commuting Zone?",
                           value = "qa4",
                           p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both degree completions (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
+                        )
+                      ),
+                      
+                      
+                      
+                      
+                      
+                      hr(),
+                      h3("Summary Data Tables"),
+                      br(),
+                      p(em("Download summary tables of research data.")),
+                      
+                      
+                      
+                      br(),
+                      bsCollapse(
+                        id = "collapse_panel",
+                        bsCollapsePanel(
+                          title = 
+                            span(
+                              "Table 1. AIREA Community Colleges Summary",
+                              create_info_button("institutions_table_info", ""), 
+                            ),
+                          value = "table1",
+                          tags$div(
+                            style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
+                            h3(
+                              span(
+                                "AIREA Community Colleges Summary",
+                                downloadButton("download_supply_table", "Download CSV", class = "btn btn-primary")
+                              )
+                            ),
+                            tags$style(HTML(
+                              "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
+                            DT::dataTableOutput("supply_table")
+                          )
+                        )
+                      ),
+                      
+                      
+                      
+                      br(),
+                      bsCollapse(
+                        id = "collapse_panel",
+                        bsCollapsePanel(
+                          title = 
+                            span("Table 2. AIREA Job Postings by Commuting Zone", 
+                                 create_info_button("job_postings_table_info", "")
+                            ),
+                          value = "table2",
+                          tags$div(
+                            style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
+                            h3(
+                              span(
+                                "AIREA Job Postings by Commuting Zone",
+                                downloadButton("download_demand_table", "Download CSV", class = "btn btn-primary")
+                              )
+                            ),
+                            tags$style(HTML(
+                              "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
+                            DT::dataTableOutput("demand_table")
+                          )
                         )
                       )
                       
@@ -746,62 +806,20 @@ navbarPage(
            
            
            
-           hr(),
-           fluidRow(
-             column(12,
-                    tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
-                      div(
-                        h3("AIREA Community Colleges Summary",
-                           style = "margin: -10px;",
-                           create_info_button("institutions_table_info", "")
-                      )),
-                      
-                      tags$br(),
-                      downloadButton("download_supply_table", "Download CSV", class = "btn btn-primary", style = "margin-bottom:10px;"),
-                      tags$style(HTML(
-                        "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
-                      DT::dataTableOutput("supply_table")
-                    )
-             )
-           ),
-           
            
            
            br(),
-           hr(),
            fluidRow(
              column(12,
                     tags$div(
-                      style = "background-color: #dff3f6; padding: 15px; border-radius: 5px; margin: 15px 0;",
-                      div(
-                        h3("AIREA Job Postings by Commuting Zone",
-                           style = "margin: -10px;",
-                           create_info_button("job_postings_table_info", "")
-                    )),
-                    
-                    tags$br(),
-                    downloadButton("download_demand_table", "Download CSV", class = "btn btn-primary", style = "margin-bottom:10px;"),
-                    tags$style(HTML(
-                      "table.dataTable tr.active td, table.dataTable tr.active {background-color: #31a2b6  !important;}")),
-                    DT::dataTableOutput("demand_table")
+                      style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:50%; margin-left:auto; margin-right:auto;",
+                      h3("Research Data Access", style = "text-align: center;"),
+                      p(
+                        "Researchers and analysts can access underlying datasets via our OSF repository:",
+                        tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
+                      )
                     )
              )
-           ),
-  
-  
-  br(),
-  fluidRow(
-    column(12,
-           tags$div(
-             style = "background-color: #ffffff; padding: 15px; border: 2px solid #5ca060; border-radius: 5px; margin: 15px 0; width:50%; margin-left:auto; margin-right:auto;",
-             h3("Research Data Access:", style = "text-align: center;"),
-             p(
-               "Researchers and analysts can access underlying datasets via our OSF repository:",
-               tags$a(href = "https://osf.io/x9jz6/", target = "_blank", "AIREA Data Explorer OSF Repository")
-             )
            )
-    )
   )
-)
 )

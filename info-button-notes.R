@@ -93,7 +93,7 @@ info_notes <-
     map_year_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide which year to see community college AIREA credentials and proximal AIREA job postings."
       )),
       placement = "right",
       trigger = "hover",
@@ -105,7 +105,7 @@ info_notes <-
     map_color_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide how to filter annual AIREA job postings data within commuting zones."
       )),
       placement = "right",
       trigger = "hover",
@@ -117,7 +117,7 @@ info_notes <-
     map_institution_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Have a specific community college in mind? Use this bar to search for and select a specific community college."
       )),
       placement = "right",
       trigger = "hover",
@@ -129,7 +129,7 @@ info_notes <-
     supply_search_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Use this bar to search for and select any community college in the nation."
       )),
       placement = "right",
       trigger = "hover",
@@ -141,7 +141,7 @@ info_notes <-
     supply_leader_airea_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Colleges in this bar are sorted in descending order, starting with the college with the highest number of AIREA credentials awarded each year on average between 2010-2023."
       )),
       placement = "right",
       trigger = "hover",
@@ -153,7 +153,7 @@ info_notes <-
     supply_leader_pct_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Colleges in this bar are sorted in descending order, starting with the college with the highest share of AIREA credentials awarded each year on average between 2010-2023. AIREA percentages are calculated as the number of AIREA credentials divided by the number of total credentials (AIREA and non-AIREA)."
       )),
       placement = "right",
       trigger = "hover",
@@ -165,7 +165,7 @@ info_notes <-
     supply_metric_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide whether to filter AIREA credentials by raw counts or percentage of total credentials."
       )),
       placement = "right",
       trigger = "hover",
@@ -177,7 +177,7 @@ info_notes <-
     supply_bar_style_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide whether to filter AIREA credentials by raw counts or percentage of total credentials."
       )),
       placement = "right",
       trigger = "hover",
@@ -189,7 +189,7 @@ info_notes <-
     supply_bar_year_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide which year to see community college AIREA credentials."
       )),
       placement = "right",
       trigger = "hover",
@@ -201,7 +201,7 @@ info_notes <-
     cz_search_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Use this bar to search for and select any commuting zone in the nation."
       )),
       placement = "right",
       trigger = "hover",
@@ -213,7 +213,7 @@ info_notes <-
     cz_leader_posts_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Commuting zones in this bar are sorted in descending order, starting with the commuting zone with the highest (raw) number of annual AIREA job postings averaged across 2010-2023."
       )),
       placement = "right",
       trigger = "hover",
@@ -225,7 +225,7 @@ info_notes <-
     cz_leader_pct_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Commuting zones in this bar are sorted in descending order, starting with the commuting zone with the highest share of annual AIREA job postings on average between 2010-2023. AIREA percentages are calculated as the number of AIREA job postings divided by the number of total job postings (AIREA and non-AIREA)."
       )),
       placement = "right",
       trigger = "hover",
@@ -237,7 +237,7 @@ info_notes <-
     cz_leader_per1000_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "ADD NOTE"
       )),
       placement = "right",
       trigger = "hover",
@@ -249,7 +249,7 @@ info_notes <-
     demand_metric_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide whether to filter AIREA job postings by raw counts, percentage of total job postings, or AIREA postings per capita."
       )),
       placement = "right",
       trigger = "hover",
@@ -261,7 +261,7 @@ info_notes <-
     demand_bar_style_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide whether to filter AIREA job postings by raw counts or percentage of total job postings."
       )),
       placement = "right",
       trigger = "hover",
@@ -287,7 +287,7 @@ info_notes <-
     demand_bar_year_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Decide which year to see AIREA job postings."
       )),
       placement = "right",
       trigger = "hover",
@@ -299,10 +299,12 @@ info_notes <-
     institutions_table_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Download the raw AIREA completions data we used to generate the AIREA Data Explorer. AIREA completions data were drawn from the ",
+        tags$a("Integrated Postsecondary Education Data System", href = "https://nces.ed.gov/ipeds"),
+        " (IPEDS) Completions and Directory files, 2010-2023. Data available for download have been cleaned and simplified by the AIREA Data Explorer team."
       )),
       placement = "right",
-      trigger = "hover",
+      trigger = "click",
       options = list(container = "body")
     ),
     
@@ -311,10 +313,12 @@ info_notes <-
     job_postings_table_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "Notes to be added here."
+        "Download the raw AIREA job positings data we used to generate the AIREA Data Explorer. AIREA job postings were drawn from ",
+        tags$a("Lightcast", href = "https://lightcast.io/products/data/overview"), 
+        ", 2010-2023. Data available for download have been cleaned and simplified by the AIREA Data Explorer team."
       )),
       placement = "right",
-      trigger = "hover",
+      trigger = "click",
       options = list(container = "body")
     ),
     
