@@ -336,7 +336,7 @@ ccrc_theme <-
       element_text(
         color = ccrc_colors$purple,
         face = "bold",
-        size = 24,
+        size = 18,
         hjust = 0.5),
     axis.title = element_text(color = ccrc_colors$gray, face = "bold"),
     axis.text = element_text(color = ccrc_colors$gray),
@@ -610,8 +610,8 @@ server <- function(input, output, session) {
       )
     
     y_col <- if (metric == "pct") "airea_pct" else "total_airea_completions"
-    y_label <- if (metric == "pct") "AIREA Credentials Percentage (%)" else "Number of AIREA Credentials"
-    title_txt <- if (metric == "pct") "AIREA Credentials Percentage" else "AIREA Credentials"
+    y_label <- if (metric == "pct") "AIREA Credentials Percentage" else "Number of AIREA Credentials"
+    title_txt <- if (metric == "pct") "AIREA Credentials %" else "AIREA Credentials"
     title_txt <- paste(title_txt, "—", my_inst$instnm)
     
     # Join national average appropriate to metric
@@ -627,7 +627,7 @@ server <- function(input, output, session) {
       geom_line(data = nat_df, aes(x = year, y = nat_value),
                 inherit.aes = FALSE, linewidth = 1, linetype = "dashed", color = ccrc_colors$orange) +
       ccrc_theme +
-      { if (!is.null(year_breaks)) scale_x_continuous(breaks = year_breaks) else NULL } +
+      { if (!is.null(year_breaks)) scale_x_continuous(breaks = year_breaks, labels = scales::comma_format(accuracy = 1)) else NULL } +
       labs(
         title = title_txt,
         x = NULL,
@@ -638,7 +638,7 @@ server <- function(input, output, session) {
     if (metric == "pct") {
       p <- p + scale_y_continuous(labels = function(x) paste0(x, "%"))
     } else {
-      p <- p + scale_y_continuous(labels = scales::comma)
+      p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE))
     }
     
     girafe(ggobj = p, height_svg = 6, width_svg = 10)
@@ -709,7 +709,7 @@ server <- function(input, output, session) {
         geom_col_interactive(aes(tooltip = tooltip), position = position_fill(reverse = TRUE)) +
         coord_flip() +
         ccrc_theme +
-        scale_y_continuous(position = "right") +
+        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
         scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
         labs(
           title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm, title_suffix),
@@ -737,7 +737,7 @@ server <- function(input, output, session) {
         coord_flip() +
         ccrc_theme +
         scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
-        scale_y_continuous(labels = scales::comma, position = "right") +
+        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
         labs(
           title = paste("AIREA Credentials —", my_inst$instnm, title_suffix),
           y = "Number of AIREA Credentials",
@@ -913,7 +913,7 @@ server <- function(input, output, session) {
                       airea = "AIREA job posts",
                       pct = "AIREA job posts (%)",
                       per100k = "AIREA job posts per 100,000")
-    title_txt <- paste("AIREA Job Posts —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
+    title_txt <- paste("AIREA Job Postings —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
     
     # Add tooltip
     demand_selected <- demand_selected %>%
@@ -977,9 +977,9 @@ server <- function(input, output, session) {
         caption = "Dashed line shows U.S. national average"
       )
     
-    if (metric == "airea") { p <- p + scale_y_continuous(labels = scales::comma) }
+    if (metric == "airea") { p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) }
     else if (metric == "pct") { p <- p + scale_y_continuous(labels = function(x) paste0(x, "%")) }
-    else if (metric == "per100k") { p <- p + scale_y_continuous(labels = scales::comma) }
+    else if (metric == "per100k") { p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) }
     
     girafe(ggobj = p, height_svg = 6, width_svg = 10)
   })
@@ -1083,7 +1083,7 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
-        scale_y_continuous(position = "right") +
+        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
         scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
@@ -1105,7 +1105,7 @@ server <- function(input, output, session) {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
         geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
         coord_flip() +
-        scale_y_continuous(labels = scales::comma) +
+        scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) +
         labs(
           x = NULL,
           y = "Number of Job Postings",
@@ -1113,7 +1113,7 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
-        scale_y_continuous(position = "right") +
+        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
         scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
