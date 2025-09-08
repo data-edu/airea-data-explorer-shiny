@@ -6,3 +6,5 @@
 data/supply.duckdb
 
 data/demand.duckdb
+
+.DS_Store
