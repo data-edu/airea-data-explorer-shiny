@@ -376,9 +376,9 @@ navbarPage(
                         label = h3("Select Year:", style = "margin: -15px;",
                                    create_info_button("supply_bar_year_info", "")
                         ),
-                        choices = c("Overall", 2010:2023),
-                        selected = "Overall",
-                        width = "40%"
+                        choices = c("All Years", 2010:2023),
+                        selected = "All Years",
+                        width = "20%"
                       )
                     ),
                     br()
@@ -511,7 +511,7 @@ navbarPage(
                         choices = c(
                           "Number of AIREA Job Postings" = "airea",
                           "AIREA % of All Postings" = "pct",
-                          "AIREA Postings per 100,000" = "per100k"
+                          "AIREA Postings per 1,000" = "per100k"
                         ),
                         selected = "airea",
                         inline = FALSE
@@ -573,9 +573,9 @@ navbarPage(
                         label = h3("Select Year:", style = "margin: -15px; text-align: center;", 
                                    create_info_button("demand_bar_year_info", "")
                         ),
-                        choices = c("Overall", 2010:2023),
-                        selected = "Overall",
-                        width = "50%"
+                        choices = c("All Years", 2010:2023),
+                        selected = "All Years",
+                        width = "20%"
                       ),
                       br()
                     ),
