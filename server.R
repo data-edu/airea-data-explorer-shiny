@@ -627,7 +627,7 @@ server <- function(input, output, session) {
       geom_line(data = nat_df, aes(x = year, y = nat_value),
                 inherit.aes = FALSE, linewidth = 1, linetype = "dashed", color = ccrc_colors$orange) +
       ccrc_theme +
-      { if (!is.null(year_breaks)) scale_x_continuous(breaks = year_breaks, labels = scales::comma_format(accuracy = 1)) else NULL } +
+      { if (!is.null(year_breaks)) scale_x_continuous(breaks = year_breaks) else NULL } +
       labs(
         title = title_txt,
         x = NULL,
@@ -638,7 +638,7 @@ server <- function(input, output, session) {
     if (metric == "pct") {
       p <- p + scale_y_continuous(labels = function(x) paste0(x, "%"))
     } else {
-      p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE))
+      p <- p + scale_y_continuous(labels = scales::comma)
     }
     
     girafe(ggobj = p, height_svg = 6, width_svg = 10)
@@ -649,11 +649,11 @@ server <- function(input, output, session) {
     
     my_inst <- selected_institution()
     
-    # Year selection: "Overall" aggregates across all years; else filter to chosen year
+    # Year selection: "All Years" aggregates across all years; else filter to chosen year
     year_choice <- input$supply_bar_year
     base_tbl <- supply_tbl %>% filter(instnm == !!my_inst$instnm)
-    title_suffix <- " — Overall"
-    if (!is.null(year_choice) && !identical(year_choice, "Overall")) {
+    title_suffix <- " — All Years"
+    if (!is.null(year_choice) && !identical(year_choice, "All Years")) {
       suppressWarnings({ yr_num <- as.integer(year_choice) })
       if (is.na(yr_num)) return(NULL)
       base_tbl <- base_tbl %>% filter(year == !!yr_num)
@@ -709,7 +709,7 @@ server <- function(input, output, session) {
         geom_col_interactive(aes(tooltip = tooltip), position = position_fill(reverse = TRUE)) +
         coord_flip() +
         ccrc_theme +
-        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
         labs(
           title = paste("AIREA Credentials by Program and Award Level —", my_inst$instnm, title_suffix),
@@ -737,7 +737,7 @@ server <- function(input, output, session) {
         coord_flip() +
         ccrc_theme +
         scale_x_discrete(position = "bottom", labels = function(x) stringr::str_wrap(x, width = 35)) +
-        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         labs(
           title = paste("AIREA Credentials —", my_inst$instnm, title_suffix),
           y = "Number of AIREA Credentials",
@@ -896,7 +896,7 @@ server <- function(input, output, session) {
         .groups = "drop"
       ) %>%
       mutate(
-        posts_per_100k = ifelse(is.na(pop_year) | pop_year == 0, NA_real_, (posts_airea / pop_year) * 100000),
+        posts_per_100k = ifelse(is.na(pop_year) | pop_year == 0, NA_real_, (posts_airea / pop_year) * 1000),
         airea_pct = ifelse(posts_total > 0, (posts_airea / posts_total) * 100, NA_real_)
       )
     
@@ -912,7 +912,7 @@ server <- function(input, output, session) {
     y_label <- switch(metric,
                       airea = "AIREA job posts",
                       pct = "AIREA job posts (%)",
-                      per100k = "AIREA job posts per 100,000")
+                      per100k = "AIREA job posts per 1,000")
     title_txt <- paste("AIREA Job Postings —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
     
     # Add tooltip
@@ -921,7 +921,7 @@ server <- function(input, output, session) {
         tooltip = switch(metric,
           airea = paste0("Year: ", year, "\nAIREA Posts: ", scales::comma(posts_airea)),
           pct = paste0("Year: ", year, "\nAIREA %: ", round(airea_pct, 1), "%"),
-          per100k = paste0("Year: ", year, "\nPer 100k: ", scales::comma(round(posts_per_100k)))
+          per100k = paste0("Year: ", year, "\nPer 1k: ", scales::comma(round(posts_per_100k)))
         )
       )
     
@@ -947,13 +947,9 @@ server <- function(input, output, session) {
         scaled <- suppressWarnings(if (all(val <= 1, na.rm = TRUE)) val * 100 else val)
         tibble::tibble(year = df$year, nat_value = as.numeric(scaled))
       } else if (metric == "per100k") {
-        idx100k <- first_col(c("posts_per_100k", "posts_per_100000"))
-        idx1k   <- first_col(c("posts_per_1000"))
-        if (!is.na(idx100k)) {
-          val <- df[[idx100k]]
-          tibble::tibble(year = df$year, nat_value = as.numeric(val))
-        } else if (!is.na(idx1k)) {
-          val <- df[[idx1k]] * 100
+        idx1k   <- first_col(c("posts_per_1000", "posts_per_1k"))
+        if (!is.na(idx1k)) {
+          val <- df[[idx1k]]
           tibble::tibble(year = df$year, nat_value = as.numeric(val))
         } else {
           tibble::tibble(year = df$year, nat_value = NA_real_)
@@ -977,9 +973,9 @@ server <- function(input, output, session) {
         caption = "Dashed line shows U.S. national average"
       )
     
-    if (metric == "airea") { p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) }
+    if (metric == "airea") { p <- p + scale_y_continuous(labels = scales::comma) }
     else if (metric == "pct") { p <- p + scale_y_continuous(labels = function(x) paste0(x, "%")) }
-    else if (metric == "per100k") { p <- p + scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) }
+    else if (metric == "per100k") { p <- p + scale_y_continuous(labels = scales::comma) }
     
     girafe(ggobj = p, height_svg = 6, width_svg = 10)
   })
@@ -991,7 +987,7 @@ server <- function(input, output, session) {
     year_choice <- input$demand_bar_year
     base_tbl <- demand_tbl %>%
       filter(cz_label == !!my_cz$CZ_label, year != 2025, airea == 1)
-    if (!is.null(year_choice) && !identical(year_choice, "Overall")) {
+    if (!is.null(year_choice) && !identical(year_choice, "All Years")) {
       suppressWarnings({ selected_year <- as.integer(year_choice) })
       validate(need(!is.na(selected_year), "Invalid year selection"))
       base_tbl <- base_tbl %>% filter(year == !!selected_year)
@@ -1048,7 +1044,7 @@ server <- function(input, output, session) {
     req(selected_cz())
     my_cz <- selected_cz()
     year_choice <- input$demand_bar_year
-    title_suffix <- if (!is.null(year_choice) && !identical(year_choice, "Overall")) paste0(" — ", year_choice) else " — Overall"
+    title_suffix <- if (!is.null(year_choice) && !identical(year_choice, "All Years")) paste0(" — ", year_choice) else " — All Years"
     title_txt <- paste(
       "Top AIREA Occupations —",
       gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)),
@@ -1083,7 +1079,7 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
-        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
@@ -1105,7 +1101,7 @@ server <- function(input, output, session) {
       p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
         geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
         coord_flip() +
-        scale_y_continuous(labels = scales::comma_format(scientific = FALSE)) +
+        scale_y_continuous(labels = scales::comma) +
         labs(
           x = NULL,
           y = "Number of Job Postings",
@@ -1113,7 +1109,7 @@ server <- function(input, output, session) {
           title = title_txt
         ) +
         ccrc_theme +
-        scale_y_continuous(labels = scales::comma_format(scientific = FALSE), position = "right") +
+        scale_y_continuous(labels = scales::comma, position = "right") +
         scale_x_discrete(position = "top") +
         theme(
           legend.position = "top",
