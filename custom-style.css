@@ -358,6 +358,73 @@ hr80 {
 /* Style the input selector boxes */
 /* ========================================================================== */
 
+/* Center contents inside our selector boxes */
+
+.selector-box { 
+  text-align: center;
+  background-color: #ffffff; 
+  border: 2px solid #5ca060; 
+  border-radius: 10px; 
+  padding: 12px; 
+  box-shadow: 0 1px rgba(0,0,0,0.06); 
+  width: 50%; 
+  margin: 0 auto;
+}
+.selector-box .shiny-input-container { 
+  margin-left: auto; margin-right: auto;
+}
+
+
+/* Center the value inside numeric and select inputs */
+.selector-box input.form-control { 
+  text-align: center;
+}
+.selector-box .selectize-input { 
+  text-align: center;
+}
+.selector-box select.form-control {
+  text-align: center;
+}
+
+
+/* Keep radio choices neatly centered as a block */
+.selector-box .shiny-input-radiogroup .shiny-options-group { 
+  display: inline-block; text-align: left;
+}
+
+
+/* Center values in the Supply tab search selects */
+.center-selects {
+  text-align: center;
+  background-color: #ffffff; 
+  border: 2px solid #5ca060; 
+  border-radius:10px; 
+  padding: 12px 14px; 
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); 
+  width: 90%; 
+  margin: 0 auto;
+}
+.center-selects .shiny-input-container { 
+  margin-left: auto; margin-right: auto;
+}
+.center-selects .selectize-input {
+  text-align: center;
+}
+.center-selects select.form-control {
+  text-align: center; text-align-last: center;
+}
+.center-selects input.form-control {
+  text-align: center;
+}
+
+
+
+
+
+/* ========================================================================== */
+/* Style the input selector box width and stacking */
+/* ========================================================================== */
+
 /* Container sizing adjustments */
 .center-selects {
   min-width: 0 !important; /* Allow container to shrink */
