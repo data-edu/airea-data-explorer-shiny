@@ -62,7 +62,7 @@ navbarPage(
   header = 
     div(
       class = "app-header",
-      p(tags$em("These interactive maps and data visualizations are for exploring how community college green program completions align with AIREA-sector job postings by commuting zone.")),
+      p(tags$em("These interactive maps and data visualizations are for exploring how community college AIREA program completions align with AIREA-sector job postings by commuting zone.")),
       
       hr()
     ),
@@ -742,7 +742,7 @@ navbarPage(
                           br(),
                           br(),
                           HTML(paste0(
-                            "Using IPEDS, credentials are classified into four award types:",
+                            "Using IPEDS, credentials are classified into six award types:",
                             tags$ul(
                               tags$li("<12 Week Certificates"),
                               tags$li("<1 Year Certificates"),
