@@ -661,7 +661,7 @@ navbarPage(
                           br(),
                           br(),
                           HTML(paste0(
-                            "Through this multi-step process, we identified 283 distinct SOC codes that define the set of AIREA jobs. By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."
+                            "Through this multi-step process, we identified 235 distinct SOC codes that define the set of AIREA jobs. By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."
                           )),
                           
                           br(),
@@ -698,7 +698,7 @@ navbarPage(
                             "For AIREA credentials, we used the U.S. Department of Education's ",
                             tags$a(href="https://nces.ed.gov/ipeds", 
                                    "Integrated Postsecondary Education Data System (IPEDS)"), 
-                            " degree completions and institutional directory files covering the years 2010-2023. Building from the 283 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"
+                            " degree completions and institutional directory files covering the years 2010-2023. Building from the 235 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"
                           )),
                           tags$ul(
                             tags$li("(01) Agriculture and Agricultural Operations"),
@@ -734,7 +734,7 @@ navbarPage(
                           title = "What Institutions and Award Types are Included in the AIREA Data Explorer?",
                           value = "qa3",
                           HTML(paste0(
-                            "The dataset includes 920 institutions ",
+                            "The dataset includes 938 institutions ",
                             tags$a(href="https://ccrc.tc.columbia.edu/easyblog/shifting-sectors-community-colleges-undercounting.html", "classified by CCRC as community colleges"),
                             " based on their funding sources and their provision (primarily, but not exclusively) of sub-baccalaureate degrees and certificates."
                           )),
@@ -744,11 +744,12 @@ navbarPage(
                           HTML(paste0(
                             "Using IPEDS, credentials are classified into four award types:",
                             tags$ul(
-                              tags$li("Bachelors degree"),
-                              tags$li("Award of at least 2 but less than 4 years"),
-                              tags$li("Associates degree"),
-                              tags$li("Long certificates (awards of at least 1 but less than 2 years)"),
-                              tags$li("Short certificates (awards of less than 1 year)")
+                              tags$li("<12 Week Certificates"),
+                              tags$li("<1 Year Certificates"),
+                              tags$li("1-2 Year Certificates"),
+                              tags$li("2-4 Year Certificates"),
+                              tags$li("Associate degree"),
+                              tags$li("Bachelor's degree")
                             )
                           ))
                           
