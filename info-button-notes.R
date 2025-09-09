@@ -237,7 +237,7 @@ info_notes <-
     cz_leader_per1000_info = list(
       title = "More Information",
       content = HTML(paste0(
-        "ADD NOTE"
+        "Commuting zones in this bar are sorted in descending order, starting with the commuting zone with the highest average annual share of AIREA job postings per 1,000 residents between 2010–2023."
       )),
       placement = "right",
       trigger = "hover",

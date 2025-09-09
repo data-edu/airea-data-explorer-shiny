@@ -64,20 +64,8 @@ navbarPage(
   
   title = 
     div(
-      div(style = "height: 40px;"),
-      div(
-        style = "display: flex; align-items: center; justify-content: space-between; width: 100%;",
-        h1(
-          style = "margin: 0; flex-grow: 1; padding-right: 20px;",
-          "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"
-        ),
-        img(
-          src = "logo-airea.png", 
-          height = "80px",
-          style = "flex-shrink: 0;"
-        )
-      ),
-      div(style = "height: 10px;")
+      h1("Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"),
+      img(src = "logo-airea.png")
     ),
   
   
