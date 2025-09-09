@@ -26,25 +26,8 @@ navbarPage(
   
   tags$head(
     includeCSS("custom-style.css"),
-    tags$style(HTML('
-      /* Center contents inside our selector boxes */
-      .selector-box { text-align: center; }
-      .selector-box .shiny-input-container { margin-left: auto; margin-right: auto; }
-      /* Center the value inside numeric and select inputs */
-      .selector-box input.form-control { text-align: center; }
-      .selector-box .selectize-input { text-align: center; }
-      .selector-box select.form-control { text-align: center; }
-      /* Keep radio choices neatly centered as a block */
-      .selector-box .shiny-input-radiogroup .shiny-options-group { display: inline-block; text-align: left; }
 
-      /* Center values in the Supply tab search selects */
-      .center-selects { text-align: center; }
-      .center-selects .shiny-input-container { margin-left: auto; margin-right: auto; }
-      .center-selects .selectize-input { text-align: center; }
-      .center-selects select.form-control { text-align: center; text-align-last: center; }
-      .center-selects input.form-control { text-align: center; }
-    ')),
-    
+        
     # Mapbox & JS Include Mapbox GL JS and custom scripts
     tags$link(rel="stylesheet", 
               href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css"),
@@ -64,20 +47,8 @@ navbarPage(
   
   title = 
     div(
-      div(style = "height: 40px;"),
-      div(
-        style = "display: flex; align-items: center; justify-content: space-between; width: 100%;",
-        h1(
-          style = "margin: 0; flex-grow: 1; padding-right: 20px;",
-          "Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"
-        ),
-        img(
-          src = "logo-airea.png", 
-          height = "80px",
-          style = "flex-shrink: 0;"
-        )
-      ),
-      div(style = "height: 10px;")
+      h1("Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer"),
+      img(src = "logo-airea.png")
     ),
   
   
@@ -261,16 +232,15 @@ navbarPage(
                       
                       div(
                         class = "center-selects",
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
                         
-                        h3("Search By:", style = "text-align: center;"),
-                        br(),
+                        h3("Search By:", 
+                           style = "text-align: center; margin-bottom: 10px;"),
                         
                         div(
-                          style = "display: flex; align-items: start; gap: 10px; flex-wrap: wrap;",
+                          class = "input-selectors-grid",
                           
                           div(
-                            style = "flex: 1; min-width: 200px; max-width: 32%;",
+                            class = "input-item",
                             selectizeInput(
                               inputId = "supply_search",
                               label = tags$strong("All institutions", 
@@ -281,12 +251,11 @@ navbarPage(
                               options = list(placeholder = 'Search institution...', create = FALSE, selectOnTab = FALSE, allowEmptyOption = TRUE, persist = FALSE)
                             )
                           ),
+                          
+                          div(class = "input-separator", "or"),
+                          
                           div(
-                            style = "margin-top: 20px; font-weight: bold;",
-                            "or"
-                          ),
-                          div(
-                            style = "flex: 1; min-width: 200px; max-width: 32%;",
+                            class = "input-item",
                             selectInput(
                               inputId = "supply_leader_airea",
                               label = tags$strong("Top 50 colleges by total AIREA credentials",
@@ -295,12 +264,11 @@ navbarPage(
                               choices = NULL
                             )
                           ),
+                          
+                          div(class = "input-separator", "or"),
+                          
                           div(
-                            style = "margin-top: 20px; font-weight: bold;",
-                            "or"
-                          ),
-                          div(
-                            style = "flex: 1; min-width: 200px; max-width: 32%;",
+                            class = "input-item",
                             selectInput(
                               inputId = "supply_leader_pct",
                               label = tags$strong("Top 50 colleges by AIREA % of credentials",
@@ -310,7 +278,9 @@ navbarPage(
                             )
                           )
                         )
+                        
                       )
+                      
                       
                     )
              )
@@ -328,21 +298,34 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
-                      radioButtons(
-                        inputId = "supply_metric",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;",
-                                   create_info_button("supply_metric_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_metric_info", "")
                         ),
-                        choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
-                        selected = "airea",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#supply_metric {width: 90%;}
+                          #supply_metric .radio label {width: 100%;}"
+                        )),
+                        radioButtons(
+                          inputId = "supply_metric",
+                          label = NULL,
+                          choices = c(
+                            "Number of AIREA Credentials" = "airea", 
+                            "AIREA Credentials Percentage" = "pct"
+                          ),
+                          selected = "airea",
+                          inline = FALSE
+                        )
                       )
-                    ),
-                    br()
+                      
+                    )
              )
            ),
            
+           br(),
            hr(),
            
            
@@ -355,33 +338,49 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
-                      radioButtons(
-                        inputId = "supply_bar_style",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;",
-                                   create_info_button("supply_bar_style_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_bar_style_info", "")
                         ),
-                        choices = c(
-                          "Share of Award Types within Programs" = "filled",
-                          "Choose Number of Credentials by Program" = "single"
-                        ),
-                        selected = "single",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#supply_bar_style {width: 90%;}
+                          #supply_bar_style .radio label {width: 100%;}"
+                        )),
+                        radioButtons(
+                          inputId = "supply_bar_style",
+                          label = NULL,
+                          choices = c(
+                            "Share of Award Types within Programs" = "filled",
+                            "Choose Number of Credentials by Program" = "single"
+                          ),
+                          selected = "single",
+                          inline = FALSE
+                        )
                       ),
                       
-                      br(),
                       
-                      selectInput(
-                        inputId = "supply_bar_year",
-                        label = h3("Select Year:", style = "margin: -15px;",
-                                   create_info_button("supply_bar_year_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select Year: ", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_bar_year_info", "")
                         ),
-                        choices = c("All Years", 2010:2023),
-                        selected = "All Years",
-                        width = "20%"
+                        selectInput(
+                          inputId = "supply_bar_year",
+                          label = NULL,
+                          choices = c("All Years", 2010:2023),
+                          selected = "All Years",
+                          width = "30%"
+                        )
                       )
+                      
                     ),
                     br()
+                    
              )
            )
   ),
@@ -422,16 +421,15 @@ navbarPage(
                       
                       div(
                         class = "center-selects",
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:100%; margin:0 auto;",
                         
-                        h3("Search By:", style = "text-align: center;"),
-                        br(),
+                        h3("Search By:", 
+                           style = "text-align: center; margin-bottom: 10px;"),
                         
                         div(
-                          style = "display: flex; align-items: start; gap: 10px; flex-wrap: wrap;",
+                          class = "input-selectors-grid-4",
                           
                           div(
-                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            class = "input-item",
                             selectizeInput(
                               inputId = "cz_search",
                               label = tags$strong("All commuting zones", 
@@ -442,12 +440,11 @@ navbarPage(
                               options = list(placeholder = 'Search commuting zone...', create = FALSE, selectOnTab = FALSE)
                             )
                           ),
+                          
+                          div(class = "input-separator", "or"),
+                          
                           div(
-                            style = "margin-top: 20px; font-weight: bold;",
-                            "or"
-                          ),
-                          div(
-                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            class = "input-item",
                             selectInput(
                               inputId = "cz_leader_posts",
                               label = tags$strong("Top 50 zones by total AIREA postings", 
@@ -456,12 +453,11 @@ navbarPage(
                               choices = NULL
                             )
                           ),
+                          
+                          div(class = "input-separator", "or"),
+                          
                           div(
-                            style = "margin-top: 20px; font-weight: bold;",
-                            "or"
-                          ),
-                          div(
-                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            class = "input-item",
                             selectInput(
                               inputId = "cz_leader_pct",
                               label = tags$strong("Top 50 zones by AIREA % of all postings", 
@@ -470,12 +466,11 @@ navbarPage(
                               choices = NULL
                             )
                           ),
+                          
+                          div(class = "input-separator", "or"),
+                          
                           div(
-                            style = "margin-top: 20px; font-weight: bold;",
-                            "or"
-                          ),
-                          div(
-                            style = "flex: 1; min-width: 150px; max-width: 24%;",
+                            class = "input-item",
                             selectInput(
                               inputId = "cz_leader_per1000",
                               label = tags$strong("Top 50 zones by AIREA postings per 1,000 residents", 
@@ -487,13 +482,16 @@ navbarPage(
                         )
                       )
                       
+                      
                     )
              )
            ),
            
            hr(),
            
-           # Second Row: Time series plot (full width)
+           
+           
+           # Second Row: Time series plot
            fluidRow(
              column(12,
                     br(),
@@ -501,27 +499,36 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
-                      radioButtons(
-                        inputId = "demand_metric",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;", 
-                                   create_info_button("demand_metric_info", "")
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;", 
+                           create_info_button("demand_metric_info", "")
                         ),
-                        choices = c(
-                          "Number of AIREA Job Postings" = "airea",
-                          "AIREA % of All Postings" = "pct",
-                          "AIREA Postings per 1,000" = "per100k"
-                        ),
-                        selected = "airea",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#demand_metric {width: 90%;}
+                          #demand_metric .radio label {width: 100%;}"
+                        )),
+                          radioButtons(
+                            inputId = "demand_metric",
+                            label = NULL,
+                            choices = c(
+                              "Number of AIREA Job Postings" = "airea",
+                              "AIREA % of All Postings" = "pct",
+                              "AIREA Postings per 1,000" = "per100k"
+                            ),
+                            selected = "airea",
+                            inline = FALSE
+                          )
                       )
-                    ),
-                    br()
+                      
+                    )
              )
            ),
            
-           tags$hr(),
+           br(),
+           hr(),
            
            
            # Third Row: Occupations by education requirement (Stacked Bar)
@@ -532,39 +539,50 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
-                      
-                      div(class = "selector-box",
-                          br(),
-                        radioButtons(
-                          inputId = "num_socs",
-                          label = h3("Choose Number of Occupations to Display:", style = "text-align: center;",
-                                     create_info_button("num_socs_info", "")
-                          ),
-                          choices = c(
-                            "5" = "5",
-                            "10" = "10",
-                            "15" = "15",
-                            "20" = "20",
-                            "All" = "all"
-                          ),
-                          selected = "15",
-                          inline = TRUE
-                        )
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Choose Number of Occupations to Display:",
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("num_socs_info", "")
+                        ),
+                        tags$style(HTML(
+                          "#num_socs {width: 90%;}
+                          #num_socs .radio label {width: 100%;}"
+                        )),
+                          radioButtons(
+                            inputId = "num_socs",
+                            label = NULL,
+                            choices = c(
+                              "5" = "5",
+                              "10" = "10",
+                              "15" = "15",
+                              "20" = "20",
+                              "All" = "all"
+                            ),
+                            selected = "15",
+                            inline = TRUE
+                          )
                       ),
+                      
+                      
                       
                       br(),
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select Year: ", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("demand_bar_year_info", "")
+                        ),
                         selectInput(
                           inputId = "demand_bar_year",
-                          label = h3("Select Year: ", style = "text-align: center", 
-                                     create_info_button("demand_bar_year_info", "")
-                          ),
-                        choices = c("All Years", 2010:2023),
-                        selected = "All Years",
-                        width = "20%"
-                      ),
-                      br()
+                          label = NULL,
+                          choices = c("All Years", 2010:2023),
+                          selected = "All Years",
+                          width = "30%"
+                        )
+                    )
+                      
                     ),
                     br()
              )
@@ -609,7 +627,8 @@ navbarPage(
                         bsCollapsePanel(
                           title = "What are AIREA jobs?",
                           value = "qa1",
-                          p("To identify Advanced Infrastructure, Energy, and Agriculture (AIREA) occupations, we began with the ",
+                          HTML(paste0(
+                            "To identify Advanced Infrastructure, Energy, and Agriculture (AIREA) occupations, we began with the ",
                             tags$a(href="https://www.onetcenter.org/reports/Green.html", 
                                    tags$em("Greening of the World of Work")),
                             " framework advanced by ",
@@ -618,35 +637,52 @@ navbarPage(
                             ". This framework highlights occupations connected to the green economy, organized by the Bureau of Labor Statistics' ",
                             tags$a(href="https://www.bls.gov/soc/", 
                                    tags$em("Standard Occupational Classification")),
-                            " (SOC) codes. These occupations span a wide range of industries",
-                            HTML("&mdash;"),
-                            "from renewable energy and environmental protection to construction, agriculture, and advanced manufacturing."),
+                            " (SOC) codes. These occupations span a wide range of industries&mdash;from renewable energy and environmental protection to construction, agriculture, and advanced manufacturing."
+                          )),
                           
                           br(),
-                          p("However, a narrow focus on green jobs misses critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."),
+                          br(),
+                          HTML(paste0(
+                            "However, a narrow focus on green jobs misses critical roles where skill sets overlap significantly with sustainability-related work. For example, occupations such as solar photovoltaic installers or wind turbine technicians are classic green jobs, but roles like construction managers, electrical lineworkers, or precision agriculture technicians share many of the same technical competencies and are equally central to building the workforce of the future."
+                          )),
                           
                           br(),
-                          p("Hewing exclusively to the O*NET framework meant excluding a swath of critical high-wage, high-opportunity degree programs in construction trades, precision production, and engineering. We mapped these programs to related occupations using the ",
+                          br(),
+                          HTML(paste0(
+                            "Hewing exclusively to the O*NET framework meant excluding a swath of critical high-wage, high-opportunity degree programs in construction trades, precision production, and engineering. We mapped these programs to related occupations using the ",
                             tags$a(href="https://nces.ed.gov/ipeds/cipcode/post3.aspx?y=56", 
                                    "CIP SOC Crosswalk"),
                             ", which matches each 6-digit ",
                             tags$a(href="https://nces.ed.gov/ipeds/cipcode/default.aspx?y=55", 
                                    "Classification of Instructional Programs (CIP)"),
-                            " code to all associated SOC codes. Next, we conducted a manual review of each SOC code and flagged those without a clear or direct connection to the AIREA framework. To strengthen this process, we also loaded SOC job titles, descriptions, and skills data from O*NET into several LLMs for additional review, flagging, and cross-checking."),
+                            " code to all associated SOC codes. Next, we conducted a manual review of each SOC code and flagged those without a clear or direct connection to the AIREA framework. To strengthen this process, we also loaded SOC job titles, descriptions, and skills data from O*NET into several LLMs for additional review, flagging, and cross-checking."
+                          )),
                           
                           br(),
-                          p("Through this multi-step process, we identified 283 distinct SOC codes that define the set of AIREA jobs. By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."),
+                          br(),
+                          HTML(paste0(
+                            "Through this multi-step process, we identified 283 distinct SOC codes that define the set of AIREA jobs. By combining the Greening the World of Work occupations with this broader set of related roles, AIREA jobs capture both the core green economy and the adjacent occupations that are vital to supporting infrastructure, energy, and agriculture systems in a sustainable and economically inclusive way."
+                          )),
                           
                           br(),
-                          p("Download the complete list of AIREA occupations and corresponding programs of study here."),
+                          br(),
+                          HTML(paste0(
+                            "Download the complete list of AIREA occupations and corresponding programs of study here."
+                          )),
                           
                           br(),
-                          p("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. AIREA jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor's degree or higher, as well as for those requiring less than a bachelor's degree. In fact, our analysis of wage data from the Bureau of Labor Statistics' Occupation, Employment and Wage Statistics program shows that middle-skills workers in AIREA jobs earn about 30.6 percent more annually ($61,011 vs. $46,710) than equivalently skilled workers in non-AIREA roles."),
+                          br(),
+                          HTML(paste0("AIREA jobs are vital not only for addressing climate change and advancing a sustainable future, but also for expanding pathways to economic opportunity. AIREA jobs consistently provide family-sustaining wages. This is true for occupations that require a bachelor's degree or higher, as well as for those requiring less than a bachelor's degree. In fact, our analysis of wage data from the Bureau of Labor Statistics' Occupation, Employment and Wage Statistics program shows that middle-skills workers in AIREA jobs earn about 30.6 percent more annually ($61,011 vs. $46,710) than equivalently skilled workers in non-AIREA roles."
+                          )),
                           
                           br(),
-                          p("To identify the demand for workers in AIREA fields, we used 2010-2023 job postings data from ",
+                          br(),
+                          HTML(paste0(
+                            "To identify the demand for workers in AIREA fields, we used 2010-2023 job postings data from ",
                             tags$a(href="https://lightcast.io/", "Lightcast"),
-                            ", the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every SOC code, with geographic detail down to the county level.")
+                            ", the nation's largest source of proprietary economic and workforce data. Lightcast provides job postings data for every SOC code, with geographic detail down to the county level."
+                          ))
+                          
                         )
                       ),
                       
@@ -658,10 +694,12 @@ navbarPage(
                         bsCollapsePanel(
                           title = "What are AIREA Credentials?",
                           value = "qa2",
-                          p("For AIREA credentials, we used the U.S. Department of Education's ",
+                          HTML(paste0(
+                            "For AIREA credentials, we used the U.S. Department of Education's ",
                             tags$a(href="https://nces.ed.gov/ipeds", 
                                    "Integrated Postsecondary Education Data System (IPEDS)"), 
-                            " degree completions and institutional directory files covering the years 2010-2023. Building from the 283 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"),
+                            " degree completions and institutional directory files covering the years 2010-2023. Building from the 283 SOC codes described above and using the CIP SOC Crosswalk, we include 6-digit CIP codes within the following 2-digit categories:"
+                          )),
                           tags$ul(
                             tags$li("(01) Agriculture and Agricultural Operations"),
                             tags$li("(02) Natural Resources and Conservation"),
@@ -676,10 +714,13 @@ navbarPage(
                             tags$li("(48) Precision Production"),
                             tags$li("(49) Transportation and Materials Moving")
                           ),
-                          p("We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional 6-digit CIP codes that did not align with the green economy or with skills needed to sustain it."),
+                          HTML(paste0("We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional 6-digit CIP codes that did not align with the green economy or with skills needed to sustain it."
+                          )),
                           
                           br(),
-                          p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. The resulting dataset includes 429 distinct 6-digit CIP codes (degree) programs.")
+                          br(),
+                          HTML(paste0("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. The resulting dataset includes 429 distinct 6-digit CIP codes (degree) programs."
+                          ))
                           
                         )
                       ),
@@ -692,12 +733,16 @@ navbarPage(
                         bsCollapsePanel(
                           title = "What Institutions and Award Types are Included in the AIREA Data Explorer?",
                           value = "qa3",
-                          p("The dataset includes 920 institutions ",
+                          HTML(paste0(
+                            "The dataset includes 920 institutions ",
                             tags$a(href="https://ccrc.tc.columbia.edu/easyblog/shifting-sectors-community-colleges-undercounting.html", "classified by CCRC as community colleges"),
-                            " based on their funding sources and their provision (primarily, but not exclusively) of sub-baccalaureate degrees and certificates."),
+                            " based on their funding sources and their provision (primarily, but not exclusively) of sub-baccalaureate degrees and certificates."
+                          )),
                           
                           br(),
-                          p("Using IPEDS, credentials are classified into four award types:",
+                          br(),
+                          HTML(paste0(
+                            "Using IPEDS, credentials are classified into four award types:",
                             tags$ul(
                               tags$li("Bachelors degree"),
                               tags$li("Award of at least 2 but less than 4 years"),
@@ -705,7 +750,8 @@ navbarPage(
                               tags$li("Long certificates (awards of at least 1 but less than 2 years)"),
                               tags$li("Short certificates (awards of less than 1 year)")
                             )
-                          )
+                          ))
+                          
                         )
                       ),
                       
@@ -717,7 +763,10 @@ navbarPage(
                         bsCollapsePanel(
                           title = "What is a Commuting Zone?",
                           value = "qa4",
-                          p("A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both degree completions (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions.")
+                          HTML(paste0(
+                            "A commuting zone is a geographic unit developed by the U.S. Department of Agriculture to represent local labor markets. Commuting zones group together counties based on patterns of daily commuting, capturing the areas where people live and work. Unlike state or county boundaries, commuting zones reflect the actual flow of workers across county lines, making them especially useful for analyzing the alignment between education and labor market demand. By mapping both degree completions (from IPEDS) and job postings (from Lightcast) to commuting zones, the AIREA Data Explorer allows users to compare local supply and demand dynamics within consistent, labor-market–based regions."
+                          ))
+                          
                         )
                       ),
                       
