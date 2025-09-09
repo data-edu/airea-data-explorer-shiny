@@ -35,15 +35,15 @@ map_award_level <- function(x) {
   lookup <- c(
     "20" = "<12 Week Cert",
     "21" = "12W–1Y Cert",
-    "1"  = "<1 Year Award",
+    "1"  = "<1 Year Certificate",
     "2"  = "1–2 Year Cert",
-    "3"  = "Associate’s",
+    "3"  = "Associate",
     "4"  = "2–4 Year Cert",
-    "5"  = "Bachelor’s"
+    "5"  = "Bachelor's"
   )
 
   # Define natural order for award levels (short → long)
-  levels_award <- c("<12 Week Cert", "12W–1Y Cert", "<1 Year Award", "1–2 Year Cert", "Associate’s", "2–4 Year Cert", "Bachelor’s")
+  levels_award <- c("<12 Week Cert", "12W–1Y Cert", "<1 Year Certificate", "1–2 Year Cert", "Associate", "2–4 Year Cert", "Bachelor's")
   mapped <- unname(lookup[as.character(x_num)])
   mapped[is.na(mapped)] <- "Other"
   factor(mapped, levels = c(levels_award, "Other"))
@@ -919,16 +919,16 @@ server <- function(input, output, session) {
                     pct = "airea_pct",
                     per100k = "posts_per_100k")
     y_label <- switch(metric,
-                      airea = "AIREA job posts",
-                      pct = "AIREA job posts (%)",
-                      per100k = "AIREA job posts per 1,000")
+                      airea = "AIREA job postings",
+                      pct = "AIREA job postings (%)",
+                      per100k = "AIREA job postings per 1,000")
     title_txt <- paste("AIREA Job Postings —", gsub("^[0-9]+ ", "", gsub(" CZ$", "", my_cz$CZ_label)))
     
     # Add tooltip
     demand_selected <- demand_selected %>%
       mutate(
         tooltip = switch(metric,
-          airea = paste0("Year: ", year, "\nAIREA Posts: ", scales::comma(posts_airea)),
+          airea = paste0("Year: ", year, "\nAIREA Postings: ", scales::comma(posts_airea)),
           pct = paste0("Year: ", year, "\nAIREA %: ", round(airea_pct, 1), "%"),
           per100k = paste0("Year: ", year, "\nPer 1k: ", scales::comma(round(posts_per_100k)))
         )
