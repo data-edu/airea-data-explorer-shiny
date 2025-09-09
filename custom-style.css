@@ -22,29 +22,60 @@ input[type="number"] {
 /* Overall navbar appearance */
 .navbar {
   background-color: #f2f8f2;  /* light green */
+  min-height: 120px !important;  /* Ensure enough height for the logo */
+  padding: 0 !important;
 }
 
-/* The title/logo styling */
+/* Target the actual container */
+.navbar-header {
+  width: 100% !important;
+}
+
+/* The navbar-brand span wrapper */
 .navbar-brand {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  margin: 10px 0;
+  display: block !important;
+  width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto !important; /* Match your image height */
 }
 
+/* Target the inner div that contains h1 and img */
+.navbar-brand > div {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 20px 0px 20px 0px !important;
+  margin: 0 !important;
+  gap: 0 !important;
+}
+
+/* Style the h1 */
 .navbar-brand h1 {
   font-family: 'Lato', sans-serif;
   font-size: 28px;
   font-weight: 700;
   color: #5ca060;
-  padding: 20px 0;
+  margin: 0 !important;
+  padding: 0 !important;  /* Only right padding */
+  flex: 1 !important;
+  line-height: 1.2 !important;
 }
 
-
+/* Style the image */
+.navbar-brand img {
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 80px !important;
+  width: auto !important;
+}
 
 /* Adjust menu positioning */
 .navbar-nav {
-  margin-top: 60px !important;  /* Push menu down to center vertically */
+  margin-top: 0 !important;
   margin-left: -20px !important;
 }
 
@@ -58,6 +89,8 @@ input[type="number"] {
   border-radius: 5px;
   padding: 10px !important;  /* Increase padding for better spacing */
 }
+
+
 
 /* Hover effect for inactive tabs */
 .navbar-nav > li > a:hover,
