@@ -26,25 +26,8 @@ navbarPage(
   
   tags$head(
     includeCSS("custom-style.css"),
-    tags$style(HTML('
-      /* Center contents inside our selector boxes */
-      .selector-box { text-align: center; }
-      .selector-box .shiny-input-container { margin-left: auto; margin-right: auto; }
-      /* Center the value inside numeric and select inputs */
-      .selector-box input.form-control { text-align: center; }
-      .selector-box .selectize-input { text-align: center; }
-      .selector-box select.form-control { text-align: center; }
-      /* Keep radio choices neatly centered as a block */
-      .selector-box .shiny-input-radiogroup .shiny-options-group { display: inline-block; text-align: left; }
 
-      /* Center values in the Supply tab search selects */
-      .center-selects { text-align: center; }
-      .center-selects .shiny-input-container { margin-left: auto; margin-right: auto; }
-      .center-selects .selectize-input { text-align: center; }
-      .center-selects select.form-control { text-align: center; text-align-last: center; }
-      .center-selects input.form-control { text-align: center; }
-    ')),
-    
+        
     # Mapbox & JS Include Mapbox GL JS and custom scripts
     tags$link(rel="stylesheet", 
               href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css"),
@@ -249,10 +232,9 @@ navbarPage(
                       
                       div(
                         class = "center-selects",
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:90%; margin:0 auto;",
                         
-                        h3("Search By:", style = "text-align: center;"),
-                        br(),
+                        h3("Search By:", 
+                           style = "text-align: center; margin-bottom: 10px;"),
                         
                         div(
                           class = "input-selectors-grid",
@@ -297,8 +279,6 @@ navbarPage(
                           )
                         )
                         
-                        
-                        
                       )
                       
                       
@@ -318,21 +298,34 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
-                      radioButtons(
-                        inputId = "supply_metric",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;",
-                                   create_info_button("supply_metric_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_metric_info", "")
                         ),
-                        choices = c("Number of AIREA Credentials" = "airea", "AIREA Credentials Percentage" = "pct"),
-                        selected = "airea",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#supply_metric {width: 90%;}
+                          #supply_metric .radio label {width: 100%;}"
+                        )),
+                        radioButtons(
+                          inputId = "supply_metric",
+                          label = NULL,
+                          choices = c(
+                            "Number of AIREA Credentials" = "airea", 
+                            "AIREA Credentials Percentage" = "pct"
+                          ),
+                          selected = "airea",
+                          inline = FALSE
+                        )
                       )
-                    ),
-                    br()
+                      
+                    )
              )
            ),
            
+           br(),
            hr(),
            
            
@@ -345,33 +338,49 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
-                      radioButtons(
-                        inputId = "supply_bar_style",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;",
-                                   create_info_button("supply_bar_style_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_bar_style_info", "")
                         ),
-                        choices = c(
-                          "Share of Award Types within Programs" = "filled",
-                          "Choose Number of Credentials by Program" = "single"
-                        ),
-                        selected = "single",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#supply_bar_style {width: 90%;}
+                          #supply_bar_style .radio label {width: 100%;}"
+                        )),
+                        radioButtons(
+                          inputId = "supply_bar_style",
+                          label = NULL,
+                          choices = c(
+                            "Share of Award Types within Programs" = "filled",
+                            "Choose Number of Credentials by Program" = "single"
+                          ),
+                          selected = "single",
+                          inline = FALSE
+                        )
                       ),
                       
-                      br(),
                       
-                      selectInput(
-                        inputId = "supply_bar_year",
-                        label = h3("Select Year:", style = "margin: -15px;",
-                                   create_info_button("supply_bar_year_info", "")
+                      
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select Year: ", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("supply_bar_year_info", "")
                         ),
-                        choices = c("All Years", 2010:2023),
-                        selected = "All Years",
-                        width = "20%"
+                        selectInput(
+                          inputId = "supply_bar_year",
+                          label = NULL,
+                          choices = c("All Years", 2010:2023),
+                          selected = "All Years",
+                          width = "30%"
+                        )
                       )
+                      
                     ),
                     br()
+                    
              )
            )
   ),
@@ -412,10 +421,9 @@ navbarPage(
                       
                       div(
                         class = "center-selects",
-                        style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); width:100%; margin:0 auto;",
                         
-                        h3("Search By:", style = "text-align: center;"),
-                        br(),
+                        h3("Search By:", 
+                           style = "text-align: center; margin-bottom: 10px;"),
                         
                         div(
                           class = "input-selectors-grid-4",
@@ -481,7 +489,9 @@ navbarPage(
            
            hr(),
            
-           # Second Row: Time series plot (full width)
+           
+           
+           # Second Row: Time series plot
            fluidRow(
              column(12,
                     br(),
@@ -489,27 +499,36 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
-                      radioButtons(
-                        inputId = "demand_metric",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;", 
-                                   create_info_button("demand_metric_info", "")
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select:", 
+                           style = "text-align: center; margin-bottom: 10px;", 
+                           create_info_button("demand_metric_info", "")
                         ),
-                        choices = c(
-                          "Number of AIREA Job Postings" = "airea",
-                          "AIREA % of All Postings" = "pct",
-                          "AIREA Postings per 1,000" = "per100k"
-                        ),
-                        selected = "airea",
-                        inline = FALSE
+                        tags$style(HTML(
+                          "#demand_metric {width: 90%;}
+                          #demand_metric .radio label {width: 100%;}"
+                        )),
+                          radioButtons(
+                            inputId = "demand_metric",
+                            label = NULL,
+                            choices = c(
+                              "Number of AIREA Job Postings" = "airea",
+                              "AIREA % of All Postings" = "pct",
+                              "AIREA Postings per 1,000" = "per100k"
+                            ),
+                            selected = "airea",
+                            inline = FALSE
+                          )
                       )
-                    ),
-                    br()
+                      
+                    )
              )
            ),
            
-           tags$hr(),
+           br(),
+           hr(),
            
            
            # Third Row: Occupations by education requirement (Stacked Bar)
@@ -520,39 +539,50 @@ navbarPage(
                     br(),
                     div(
                       class = "selector-box",
-                      style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
-                      
-                      div(class = "selector-box",
-                          br(),
-                        radioButtons(
-                          inputId = "num_socs",
-                          label = h3("Choose Number of Occupations to Display:", style = "text-align: center;",
-                                     create_info_button("num_socs_info", "")
-                          ),
-                          choices = c(
-                            "5" = "5",
-                            "10" = "10",
-                            "15" = "15",
-                            "20" = "20",
-                            "All" = "all"
-                          ),
-                          selected = "15",
-                          inline = TRUE
-                        )
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Choose Number of Occupations to Display:",
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("num_socs_info", "")
+                        ),
+                        tags$style(HTML(
+                          "#num_socs {width: 90%;}
+                          #num_socs .radio label {width: 100%;}"
+                        )),
+                          radioButtons(
+                            inputId = "num_socs",
+                            label = NULL,
+                            choices = c(
+                              "5" = "5",
+                              "10" = "10",
+                              "15" = "15",
+                              "20" = "20",
+                              "All" = "all"
+                            ),
+                            selected = "15",
+                            inline = TRUE
+                          )
                       ),
+                      
+                      
                       
                       br(),
+                      div(
+                        style = "display: flex; flex-direction: column; align-items: center; width: 100%;",
+                        h3("Select Year: ", 
+                           style = "text-align: center; margin-bottom: 10px;",
+                           create_info_button("demand_bar_year_info", "")
+                        ),
                         selectInput(
                           inputId = "demand_bar_year",
-                          label = h3("Select Year: ", style = "text-align: center", 
-                                     create_info_button("demand_bar_year_info", "")
-                          ),
-                        choices = c("All Years", 2010:2023),
-                        selected = "All Years",
-                        width = "20%"
-                      ),
-                      br()
+                          label = NULL,
+                          choices = c("All Years", 2010:2023),
+                          selected = "All Years",
+                          width = "30%"
+                        )
+                    )
+                      
                     ),
                     br()
              )
