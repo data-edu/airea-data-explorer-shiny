@@ -534,24 +534,12 @@ navbarPage(
                       class = "selector-box",
                       style = "background-color:#ffffff; border:2px solid #5ca060; border-radius:10px; padding:12px; box-shadow:0 1px rgba(0,0,0,0.06); width:50%; margin:0 auto;",
                       
-                      radioButtons(
-                        inputId = "demand_bar_style",
-                        label = h3("Select:", style = "margin: -15px; text-align: center;", 
-                                   create_info_button("demand_bar_style_info", "")
-                        ),
-                        choices = c(
-                          "Share of Job Postings" = "filled",
-                          "Number of Job Postings" = "single"
-                        ),
-                        selected = "single",
-                        inline = FALSE
-                      ),
                       
-                      br(),
                       div(class = "selector-box",
+                          br(),
                         radioButtons(
                           inputId = "num_socs",
-                          label = h3("Choose Number of Top Occupations to Display:", style = "margin: -15px;",
+                          label = h3("Choose Number of Occupations to Display:", style = "text-align: center;",
                                      create_info_button("num_socs_info", "")
                           ),
                           choices = c(
@@ -559,8 +547,7 @@ navbarPage(
                             "10" = "10",
                             "15" = "15",
                             "20" = "20",
-                            "25" = "25",
-                            "All Available" = "all"
+                            "All" = "all"
                           ),
                           selected = "15",
                           inline = TRUE
@@ -568,11 +555,11 @@ navbarPage(
                       ),
                       
                       br(),
-                      selectInput(
-                        inputId = "demand_bar_year",
-                        label = h3("Select Year:", style = "margin: -15px; text-align: center;", 
-                                   create_info_button("demand_bar_year_info", "")
-                        ),
+                        selectInput(
+                          inputId = "demand_bar_year",
+                          label = h3("Select Year: ", style = "text-align: center", 
+                                     create_info_button("demand_bar_year_info", "")
+                          ),
                         choices = c("All Years", 2010:2023),
                         selected = "All Years",
                         width = "20%"
@@ -692,10 +679,8 @@ navbarPage(
                           p("We manually reviewed and flagged every degree program and their descriptions, and used multiple LLMs to help flag additional 6-digit CIP codes that did not align with the green economy or with skills needed to sustain it."),
                           
                           br(),
-                          p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. The resulting dataset includes 429 distinct 6-digit CIP codes (degree) programs."),
+                          p("This process allowed us to balance a structured, data-driven methodology with a careful review to ensure that the degree programs included in AIREA reflect both sustainability-focused pathways and related fields with overlapping skills. The resulting dataset includes 429 distinct 6-digit CIP codes (degree) programs.")
                           
-                          br(),
-                          p("Download the complete list of AIREA occupations and corresponding programs of study here.")
                         )
                       ),
                       

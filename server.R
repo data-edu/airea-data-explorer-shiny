@@ -495,7 +495,10 @@ server <- function(input, output, session) {
     if (!is.null(input$supply_leader_airea) && nzchar(input$supply_leader_airea)) selected_inst_name(input$supply_leader_airea)
   }, ignoreInit = TRUE)
   observeEvent(input$supply_leader_pct, {
-    if (!is.null(input$supply_leader_pct) && nzchar(input$supply_leader_pct)) selected_inst_name(input$supply_leader_pct)
+    if (!is.null(input$supply_leader_pct) && nzchar(input$supply_leader_pct)) {
+      selected_inst_name(input$supply_leader_pct)
+      updateRadioButtons(session, "supply_metric", selected = "pct")
+    }
   }, ignoreInit = TRUE)
   
   # Selected institution from search (fallback to first in table if empty)
@@ -809,10 +812,16 @@ server <- function(input, output, session) {
     if (!is.null(input$cz_leader_posts) && nzchar(input$cz_leader_posts)) selected_cz_name(input$cz_leader_posts)
   }, ignoreInit = TRUE)
   observeEvent(input$cz_leader_pct, {
-    if (!is.null(input$cz_leader_pct) && nzchar(input$cz_leader_pct)) selected_cz_name(input$cz_leader_pct)
+    if (!is.null(input$cz_leader_pct) && nzchar(input$cz_leader_pct)) {
+      selected_cz_name(input$cz_leader_pct)
+      updateRadioButtons(session, "demand_metric", selected = "pct")
+    }
   }, ignoreInit = TRUE)
   observeEvent(input$cz_leader_per1000, {
-    if (!is.null(input$cz_leader_per1000) && nzchar(input$cz_leader_per1000)) selected_cz_name(input$cz_leader_per1000)
+    if (!is.null(input$cz_leader_per1000) && nzchar(input$cz_leader_per1000)) {
+      selected_cz_name(input$cz_leader_per1000)
+      updateRadioButtons(session, "demand_metric", selected = "per100k")
+    }
   }, ignoreInit = TRUE)
   
   # Selected CZ from search
@@ -1052,9 +1061,6 @@ server <- function(input, output, session) {
     )
     plot_df <- demand_soc_df()
     validate(need(nrow(plot_df) > 0, "No data for selection"))
-    bar_style <- input$demand_bar_style
-    if (is.null(bar_style)) bar_style <- "single"
-    
     # Add tooltips including SOC group information
     plot_df <- plot_df %>%
       mutate(
@@ -1067,66 +1073,34 @@ server <- function(input, output, session) {
     num_groups <- length(unique(plot_df$soc_group))
     h <- max(11, base + height_per_bar * nrow(plot_df) + 0.5 * num_groups)
     
-    if (bar_style == "filled") {
-      p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = position_fill(reverse = TRUE)) +
-        coord_flip() +
-        scale_y_continuous(labels = scales::percent) +
-        labs(
-          x = NULL,
-          y = "Share of Job Postings",
-          fill = "Education Requirement",
-          title = title_txt
-        ) +
-        ccrc_theme +
-        scale_y_continuous(labels = scales::comma, position = "right") +
-        scale_x_discrete(position = "top") +
-        theme(
-          legend.position = "top",
-          legend.justification = "left",
-          legend.box.just = "left",
-          legend.box = "horizontal",
-          strip.placement = "outside",
-          strip.background = element_blank(),
-          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
-          plot.margin = margin(80, 30, 10, 160)  # give more room for title (top) and strips (left)
-        ) +
-        scale_fill_manual(values = ccrc_palette) +
-        scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
-        guides(fill = guide_legend(reverse = TRUE)) +
-        facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
-                   labeller = labeller(soc_group = label_wrap_gen(18)))
-      girafe(ggobj = p, height_svg = h, width_svg = 16)
-    } else {
-      p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
-        geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
-        coord_flip() +
-        scale_y_continuous(labels = scales::comma) +
-        labs(
-          x = NULL,
-          y = "Number of Job Postings",
-          fill = "Education Requirement",
-          title = title_txt
-        ) +
-        ccrc_theme +
-        scale_y_continuous(labels = scales::comma, position = "right") +
-        scale_x_discrete(position = "top") +
-        theme(
-          legend.position = "top",
-          legend.justification = "left",
-          legend.box.just = "left",
-          legend.box = "horizontal",
-          strip.placement = "outside",
-          strip.background = element_blank(),
-          strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
-          plot.margin = margin(80, 30, 10, 160)  # give more room for title (top) and strips (left)
-        ) +
-        scale_fill_manual(values = ccrc_palette) +
-        scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
-        guides(fill = guide_legend(reverse = TRUE)) +
-        facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
-                   labeller = labeller(soc_group = label_wrap_gen(18)))
-      girafe(ggobj = p, height_svg = h, width_svg = 16)
-    }
+    p <- ggplot(plot_df, aes(x = soc_title, y = total_postings, fill = ed_req)) +
+      geom_col_interactive(aes(tooltip = tooltip), position = position_stack(reverse = TRUE)) +
+      coord_flip() +
+      scale_y_continuous(labels = scales::comma) +
+      labs(
+        x = NULL,
+        y = "Number of Job Postings",
+        fill = "Education Requirement",
+        title = title_txt
+      ) +
+      ccrc_theme +
+      scale_y_continuous(labels = scales::comma, position = "right") +
+      scale_x_discrete(position = "top") +
+      theme(
+        legend.position = "top",
+        legend.justification = "left",
+        legend.box.just = "left",
+        legend.box = "horizontal",
+        strip.placement = "outside",
+        strip.background = element_blank(),
+        strip.text.y.left = element_text(angle = 0, face = "bold", size = 12),
+        plot.margin = margin(80, 30, 10, 160)  # give more room for title (top) and strips (left)
+      ) +
+      scale_fill_manual(values = ccrc_palette) +
+      scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 35)) +
+      guides(fill = guide_legend(reverse = TRUE)) +
+      facet_grid(soc_group ~ ., scales = "free_y", space = "free_y", switch = "y",
+                 labeller = labeller(soc_group = label_wrap_gen(18)))
+    girafe(ggobj = p, height_svg = h, width_svg = 16)
   })
 }
