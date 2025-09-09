@@ -349,3 +349,175 @@ hr80 {
   z-index: 1000 !important;
   pointer-events: none !important;
 }
+
+
+
+
+
+/* ========================================================================== */
+/* Style the input selector boxes */
+/* ========================================================================== */
+
+/* Container sizing adjustments */
+.center-selects {
+  min-width: 0 !important; /* Allow container to shrink */
+  overflow: hidden !important; /* Prevent overflow */
+}
+
+/* 3-column CSS Grid approach with responsive breakpoints */
+.input-selectors-grid {
+  display: grid !important;
+  gap: 10px !important;
+  align-items: end !important;
+  min-width: 0 !important; /* Allow grid to shrink */
+  
+  /* Default: 3-column horizontal layout */
+  grid-template-columns: 1fr auto 1fr auto 1fr !important;
+}
+
+.input-selectors-grid .input-item {
+  max-width: none !important;
+  min-width: 0 !important; /* Allow input items to shrink */
+}
+
+/* Ensure input controls can shrink */
+.input-selectors-grid .selectize-control,
+.input-selectors-grid .form-control {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.input-selectors-grid .input-separator {
+  justify-self: center !important;
+  align-self: end !important;
+  margin-bottom: 10px !important;
+  font-weight: bold !important;
+  color: #424c49 !important;
+  white-space: nowrap !important; /* Prevent "or" from wrapping */
+}
+
+/* 3-column responsive breakpoints */
+/* Large screens - keep horizontal but allow more breathing room */
+@media (max-width: 1200px) {
+  .input-selectors-grid {
+    gap: 8px !important; /* Reduce gap slightly */
+  }
+}
+
+/* Medium-large screens - still horizontal but tighter */
+@media (max-width: 1100px) {
+  .input-selectors-grid {
+    gap: 6px !important;
+  }
+}
+
+/* Tablet breakpoint: Stack vertically below 1000px */
+@media (max-width: 1000px) {
+  .input-selectors-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(5, auto) !important;
+    justify-items: stretch !important;
+    gap: 10px !important;
+  }
+  
+  .input-selectors-grid .input-separator {
+    justify-self: center !important;
+    align-self: center !important;
+    margin: 10px 0 !important;
+    margin-bottom: 0px !important;
+  }
+}
+
+/* Mobile breakpoint: Ensure full stacking below 768px */
+@media (max-width: 768px) {
+  .input-selectors-grid {
+    gap: 15px !important;
+  }
+  
+  .input-selectors-grid .input-item {
+    margin-bottom: 0px !important;
+  }
+  
+  .input-selectors-grid .input-separator {
+    text-align: center !important;
+    margin: 15px 0 !important;
+  }
+}
+
+/* 4-column grid variation */
+.input-selectors-grid-4 {
+  display: grid !important;
+  gap: 8px !important;
+  align-items: end !important;
+  min-width: 0 !important; /* Allow grid to shrink */
+  
+  /* Default: 4-column horizontal layout */
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr !important;
+}
+
+.input-selectors-grid-4 .input-item {
+  max-width: none !important;
+  min-width: 0 !important; /* Allow input items to shrink */
+}
+
+/* Ensure input controls can shrink */
+.input-selectors-grid-4 .selectize-control,
+.input-selectors-grid-4 .form-control {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.input-selectors-grid-4 .input-separator {
+  justify-self: center !important;
+  align-self: end !important;
+  margin-bottom: 10px !important;
+  font-weight: bold !important;
+  color: #424c49 !important;
+  white-space: nowrap !important; /* Prevent "or" from wrapping */
+}
+
+/* 4-column responsive breakpoints - more aggressive stacking needed */
+@media (max-width: 1400px) {
+  .input-selectors-grid-4 {
+    gap: 6px !important; /* Reduce gap */
+  }
+}
+
+@media (max-width: 1300px) {
+  .input-selectors-grid-4 {
+    gap: 4px !important; /* Further reduce gap */
+  }
+}
+
+/* Full vertical stack for smaller screens */
+@media (max-width: 1200px) {
+  .input-selectors-grid-4 {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(7, auto) !important;
+    justify-items: stretch !important;
+    gap: 10px !important;
+  }
+  
+  .input-selectors-grid-4 .input-separator {
+    justify-self: center !important;
+    align-self: center !important;
+    margin: 10px 0 !important;
+    margin-bottom: 0px !important;
+  }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 768px) {
+  .input-selectors-grid-4 {
+    gap: 15px !important;
+  }
+  
+  .input-selectors-grid-4 .input-item {
+    margin-bottom: 0px !important;
+  }
+  
+  .input-selectors-grid-4 .input-separator {
+    text-align: center !important;
+    margin: 15px 0 !important;
+  }
+}
