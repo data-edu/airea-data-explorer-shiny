@@ -701,7 +701,7 @@ navbarPage(
                           downloadButton(
                             "download_CIP_SOC_data", 
                             "Download Excel File", 
-                            class = "btn-primary"
+                            class = "btn-clear"
                           ),
                           
                           br(),
