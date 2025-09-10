@@ -62,7 +62,7 @@ navbarPage(
   header = 
     div(
       class = "app-header",
-      p(tags$em("These interactive maps and data visualizations are for exploring how community college green program completions align with AIREA-sector job postings by commuting zone.")),
+      p(tags$em("These interactive maps and data visualizations are for exploring how community college AIREA program completions align with AIREA-sector job postings by commuting zone.")),
       
       hr()
     ),
@@ -79,31 +79,59 @@ navbarPage(
     div(
       class = "app-footer",
       hr(),
-      p(
+      HTML(paste0(
         tags$b("Advanced Infrastructure, Energy, and Agriculture (AIREA) Data Explorer: "),
-        "The AIREA Data Explorer was created by Wei Wang, Joshua Rosenberg, ",
-        "Cameron Sublett, Matias Fresard, and Bret Staudt Willet, in partnership ",
-        "with the ",
+        "The AIREA Data Explorer was created by Wei Wang, Joshua Rosenberg, Cameron Sublett, Matias Fresard, and Bret Staudt Willet, in partnership with the ",
         tags$a(href="https://ccrc.tc.columbia.edu/", "Community College Research Center"),
-        "at Teachers College, Columbia University. Source code available on ",
+        " at Teachers College, Columbia University. Source code available on ",
         tags$a(href="https://github.com/data-edu/airea-data-explorer-shiny", "GitHub"),
-        ". Funding for this project was provided by JPMorganChase and ",
-        "the National Renewable Energy Lab.",
-        
-        br(),
-        br(),
-        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-ccrc.png", alt = "CCRC logo"),
-        HTML("&emsp;"),
-        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-utk.jpg", alt = "CCRC logo"),
-        HTML("&emsp;"),
-        tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo")
-      ),
+        ". Funding for this project was provided by JPMorganChase and the National Renewable Energy Lab."
+      )),
+      
+      br(),
+      br(),
+      tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-ccrc.png", alt = "CCRC logo"),
+      HTML("&emsp;"),
+      tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-utk.jpg", alt = "CCRC logo"),
+      HTML("&emsp;"),
+      tags$image(style = "height:3.0em; vertical-align:center;", src = "logo-fccc.svg", alt = "CCRC logo"),
       
       hr(),
-      p(tags$b(paste("\u00A9", format(Sys.Date(), "%Y"))), "by CCRC")
+      HTML(paste0(
+        tags$b("\u00A9", format(Sys.Date(), "%Y")), "by CCRC"
+      ))
     ),
   
   
+  
+  
+  
+  # ============================================================================
+  # Add fullscreen button
+  # ============================================================================
+  
+  tags$div(
+    class = "fullscreen-container",
+    actionButton(
+      "fullscreen", 
+      "",
+      icon = icon("expand"),
+      class = "btn btn-light btn-sm fullscreen-btn",
+      title = "Toggle Fullscreen"
+    )
+  ),
+  
+  tags$script(HTML(
+    "$(document).on('click', '#fullscreen', function() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      $('#fullscreen i').removeClass('fa-expand').addClass('fa-compress');
+    } else {
+      document.exitFullscreen();
+      $('#fullscreen i').removeClass('fa-compress').addClass('fa-expand');
+    }
+    });"
+  )),
   
   
   
@@ -516,7 +544,7 @@ navbarPage(
                             choices = c(
                               "Number of AIREA Job Postings" = "airea",
                               "AIREA % of All Postings" = "pct",
-                              "AIREA Postings per 1,000" = "per100k"
+                              "AIREA Postings per 1,000 residents" = "per100k"
                             ),
                             selected = "airea",
                             inline = FALSE
@@ -667,8 +695,14 @@ navbarPage(
                           br(),
                           br(),
                           HTML(paste0(
-                            "Download the complete list of AIREA occupations and corresponding programs of study here."
+                            "Download the complete list of AIREA occupations and corresponding programs of study here:"
                           )),
+                          br(),
+                          downloadButton(
+                            "download_CIP_SOC_data", 
+                            "Download Excel File", 
+                            class = "btn-primary"
+                          ),
                           
                           br(),
                           br(),
@@ -742,7 +776,7 @@ navbarPage(
                           br(),
                           br(),
                           HTML(paste0(
-                            "Using IPEDS, credentials are classified into four award types:",
+                            "Using IPEDS, credentials are classified into six award types:",
                             tags$ul(
                               tags$li("<12 Week Certificates"),
                               tags$li("<1 Year Certificates"),
