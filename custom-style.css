@@ -76,7 +76,7 @@ input[type="number"] {
   flex-shrink: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
-  height: 80px !important;
+  height: 100px !important;
   width: auto !important;
 }
 
@@ -660,4 +660,55 @@ hr80 {
     text-align: center !important;
     margin: 15px 0 !important;
   }
+}
+
+
+
+
+.btn-clear {
+  background-color: #31a2b6 !important;  /* CCRC teal */
+  color: white !important;
+  border: none !important;
+}
+
+.btn-clear:hover {
+  background-color: #278191 !important;  /* Darker teal on hover */
+}
+
+/* ========================================================================== */
+/* Style the fullscreen button */
+/* ========================================================================== */
+
+.fullscreen-container {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+
+.fullscreen-btn {
+  background-color:#31a2b6;
+  border: 1px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.fullscreen-btn:hover {
+  background-color: #278191;
+  border-color: white;
+}
+
+/* Keep same colors when clicked/focused */
+.fullscreen-btn:active,
+.fullscreen-btn:focus,
+.fullscreen-btn.active {
+  background-color: #31a2b6 !important;
+  border-color: white !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Keep hover color when hovering over active/focused button */
+.fullscreen-btn:active:hover,
+.fullscreen-btn:focus:hover {
+  background-color: #278191 !important;
+  border-color: white !important;
 }

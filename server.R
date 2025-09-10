@@ -1103,4 +1103,19 @@ server <- function(input, output, session) {
                  labeller = labeller(soc_group = label_wrap_gen(18)))
     girafe(ggobj = p, height_svg = h, width_svg = 16)
   })
+  
+  
+  output$download_CIP_SOC_data <- 
+    downloadHandler(
+      filename = function() "AIREA-CIP-SOC.xlsx",
+      content = function(file) {
+        file.copy("www/AIREA-CIP-SOC.xlsx", file)
+      }
+    )
+  
+  
 }
+
+
+
+
