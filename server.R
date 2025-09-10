@@ -1109,7 +1109,7 @@ server <- function(input, output, session) {
     downloadHandler(
       filename = function() "AIREA-CIP-SOC.xlsx",
       content = function(file) {
-        file.copy("AIREA-CIP-SOC.xlsx", file)
+        file.copy("www/AIREA-CIP-SOC.xlsx", file)
       }
     )
   
