@@ -1,13 +1,20 @@
+###############################################################################
+# LOAD REQUIRED LIBRARIES
+###############################################################################
 library(dplyr)
 library(purrr)
 library(glue)
 
-# inst_clean: 你的 institution 原始清洗数据（正确）
-# 必须包含: instnm, cz_label, year, total_credentials, airea_credentials, airea_pct, lon, lat
 
-# --------- Generate institution-year RAG documents ---------
+###############################################################################
+# A1. GENERATE INSTITUTION-YEAR DOCUMENTS
+# These documents represent a single institution in a single year.
+###############################################################################
 
-#STEP A1 — Institution-Year 文档生成代码
+# inst_clean must include:
+# instnm, cz_label, year, total_credentials, airea_credentials,
+# airea_pct, lon, lat
+
 inst_year_docs <- inst_clean %>%
   mutate(
     doc_id = paste0("INST_", gsub("[^A-Za-z0-9]", "_", instnm), "_", year),
@@ -33,9 +40,11 @@ This document describes a single institution in a single year.
   )
 
 
-#🌟 STEP A2 — 添加趋势 summary（AI 模型会用到）
+###############################################################################
+# A2. ADD TREND SUMMARY TO INSTITUTION-YEAR DOCUMENTS
+# Trends summarize credentials awarded over time for each institution.
+###############################################################################
 
-# compute trend for each institution
 inst_trend <- inst_clean %>%
   group_by(instnm) %>%
   summarise(
@@ -49,7 +58,12 @@ inst_year_docs <- inst_year_docs %>%
   ) %>%
   select(-trend)
 
-#🌟 STEP A3 — CZ-Year 文档生成代码
+
+###############################################################################
+# A3. GENERATE CZ-YEAR DOCUMENTS
+# These represent AIREA job demand for a single CZ in a single year.
+###############################################################################
+
 cz_year_docs <- cz_clean %>%
   mutate(
     doc_id = paste0("CZ_", gsub("[^A-Za-z0-9]", "_", cz_label), "_", year),
@@ -73,7 +87,12 @@ This document describes AIREA job demand in a single CZ in a single year.
     )
   )
 
-#🌟 STEP A4 — 添加 trend summary（CZ）
+
+###############################################################################
+# A4. ADD TREND SUMMARY TO CZ-YEAR DOCUMENTS
+# Trends summarize multi-year postings for each CZ.
+###############################################################################
+
 cz_trend <- cz_clean %>%
   group_by(cz_label) %>%
   summarise(
@@ -88,46 +107,52 @@ cz_year_docs <- cz_year_docs %>%
   select(-trend)
 
 
-#STEP A5 — 合并所有文档生成最终 RAG 存储库
+###############################################################################
+# A5. MERGE ALL DOCUMENT TYPES INTO A SINGLE RAG CORPUS
+# Includes:
+#   - Institution-year documents
+#   - Institution-level summaries (inst_docs)
+#   - CZ-year documents
+#   - CZ-level summaries (cz_docs)
+###############################################################################
+
 rag_documents <- bind_rows(
   inst_year_docs,
-  inst_docs,        # ← 你原来的 institution summary
+  inst_docs,        # your original institution summary documents
   cz_year_docs,
-  cz_docs           # ← 你原来的 CZ summary
+  cz_docs           # your original CZ summary documents
 )
 
 saveRDS(rag_documents, "www/rag_documents_full.rds")
 
 
-# STEP A6 — 生成 embeddings（更新版 B5）
-###############################################
-#  AIREA — Embedding Builder (Full RAG)
-#  Production-grade • Safe • Auto-resume
-###############################################
+###############################################################################
+# A6. FULL RAG EMBEDDING GENERATOR (AUTO-RESUME + RETRIES)
+# Production-grade, failure-resistant embedding pipeline.
+###############################################################################
 
-library(dplyr)
-library(purrr)
 library(openai)
 library(progress)
 library(jsonlite)
 
 # ---------------------------------------------
-# 0. Load documents
+# 0. Load RAG corpus
 # ---------------------------------------------
 rag_documents <- readRDS("www/rag_documents_full.rds")
-
 message("Loaded documents: ", nrow(rag_documents))
 
+
 # ---------------------------------------------
-# 1. Select model
+# 1. Select embedding model
 # ---------------------------------------------
 embedding_model <- "text-embedding-3-small"
 
+
 # ---------------------------------------------
-# 2. Retry wrapper for API calls
+# 2. Retry-safe embedding wrapper
 # ---------------------------------------------
 safe_embed <- function(text, retries = 5, wait = 2) {
-  for (i in 1:retries) {
+  for (i in seq_len(retries)) {
     try({
       res <- openai::create_embedding(
         model = embedding_model,
@@ -139,8 +164,9 @@ safe_embed <- function(text, retries = 5, wait = 2) {
     message("Retry ", i, "/", retries, " after failure…")
     Sys.sleep(wait * i)
   }
-  stop("Embedding failed after retries.")
+  stop("Embedding failed after multiple retries.")
 }
+
 
 # ---------------------------------------------
 # 3. Initialize progress bar
@@ -150,25 +176,27 @@ pb <- progress_bar$new(
   format = "Embedding [:bar] :percent | ETA: :eta | :current/:total"
 )
 
+
 # ---------------------------------------------
-# 4. Auto-resume support
+# 4. Enable auto-resume from previous progress
 # ---------------------------------------------
 emb_path <- "www/rag_embeddings_full.rds"
 
 if (file.exists(emb_path)) {
-  message("Resuming from previous progress…")
+  message("Resuming from previous embedding progress…")
   rag_embeddings <- readRDS(emb_path)
 } else {
   rag_embeddings <- rag_documents %>%
     mutate(embedding = vector("list", n()))
 }
 
+
 # ---------------------------------------------
 # 5. Main embedding loop
 # ---------------------------------------------
 for (i in seq_len(nrow(rag_embeddings))) {
   
-  # Skip if already done
+  # Skip records where embedding already exists
   if (!is.null(rag_embeddings$embedding[[i]]) &&
       length(rag_embeddings$embedding[[i]]) > 0) {
     pb$tick()
@@ -176,17 +204,15 @@ for (i in seq_len(nrow(rag_embeddings))) {
   }
   
   txt <- rag_embeddings$text[[i]]
-  
   emb <- safe_embed(txt)
   
   rag_embeddings$embedding[[i]] <- emb
-  
   pb$tick()
   
-  # Save every 200 rows
+  # Auto-save every 200 entries
   if (i %% 200 == 0) {
     saveRDS(rag_embeddings, emb_path)
-    message("== Auto-saved at row ", i)
+    message("== Auto-saved progress at row ", i)
   }
 }
 
@@ -194,6 +220,6 @@ for (i in seq_len(nrow(rag_embeddings))) {
 # 6. Final save
 # ---------------------------------------------
 saveRDS(rag_embeddings, emb_path)
+
 message("\n\n🎉 Embedding completed successfully!")
 message("Saved to: ", emb_path)
-
