@@ -1,7 +1,11 @@
+print("Loaded packages:")
+print(loadedNamespaces())
+
+
 # ==============================================================================
 # Load Data
 # ==============================================================================
-
+library(openai)
 library(shiny)
 library(dplyr)
 library(readr)
@@ -18,6 +22,10 @@ library(ggiraph)
 library(DBI)
 library(duckdb)
 library(dbplyr)
+
+# for chatbot
+library(later)
+
 
 # Helper: convert labelled -> factor using labels; else plain factor
 label_to_factor <- function(x) {
@@ -360,7 +368,61 @@ server <- function(input, output, session) {
   observeEvent(input$cz_metric, {
     session$sendCustomMessage("updateCZMetric", input$cz_metric)
   })
-  
+############################################################################################
+  # ============================================================================
+  # chatbot event
+  # ============================================================================
+  observeEvent(input$chat_send, {
+    
+    req(input$chat_input)
+    user_text <- input$chat_input
+    
+    # user message
+    insertUI(
+      selector = "#chat_window",
+      where = "beforeEnd",
+      ui = div(class="chat-bubble-user", user_text)
+    )
+    
+    # clear input box
+    updateTextInput(session, "chat_input", value = "")
+    
+    # GENERATE A UNIQUE ID FOR THE PLACEHOLDER
+    placeholder_id <- paste0("typing_", floor(runif(1,1,1e9)))
+    
+    # INSERT PLACEHOLDER FOR "THINKING..."
+    insertUI(
+      selector = "#chat_window",
+      where = "beforeEnd",
+      ui = tags$div(
+        id = placeholder_id,
+        class="chat-bubble-bot",
+        em("Thinking...")
+      )
+    )
+    
+    session$sendCustomMessage("scroll_chat", list())
+    
+    # AI response (after short delay to show "Thinking...")
+    later::later(function() {
+      
+      ai_answer <- tryCatch(
+        rag_answer(user_text),
+        error = function(e) paste("Error:", e$message)
+      )
+      
+      # using JS to replace placeholder with actual answer
+      session$sendCustomMessage("replace_placeholder", list(
+        id = placeholder_id,
+        html = ai_answer
+      ))
+      
+      session$sendCustomMessage("scroll_chat", list())
+      
+    }, delay = 0.15)
+  })
+ 
+####################################################################################
   
   
   # ============================================================================

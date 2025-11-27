@@ -26,16 +26,32 @@ navbarPage(
   
   tags$head(
     includeCSS("custom-style.css"),
-
-        
+    
+    
     # Mapbox & JS Include Mapbox GL JS and custom scripts
     tags$link(rel="stylesheet", 
               href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css"),
     tags$script(src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"),
     tags$script(src="mapbox.js"),
     tags$script(HTML(paste0("const mapboxToken = '", mapbox_token, "';"))),
-    tags$script(src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js")
+    tags$script(src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"),
+    # chatbot JS
+    tags$script("
+    Shiny.addCustomMessageHandler('scroll_chat', function(message) {
+      var chat = document.getElementById('chat_window');
+      chat.scrollTop = chat.scrollHeight;
+    });
+
+    Shiny.addCustomMessageHandler('replace_placeholder', function(message) {
+      var el = document.getElementById(message.id);
+      if (el) {
+        el.innerHTML = message.html;
+      }
+    });
+    "),
   ),
+
+  
   
   
   
@@ -538,17 +554,17 @@ navbarPage(
                           "#demand_metric {width: 90%;}
                           #demand_metric .radio label {width: 100%;}"
                         )),
-                          radioButtons(
-                            inputId = "demand_metric",
-                            label = NULL,
-                            choices = c(
-                              "Number of AIREA Job Postings" = "airea",
-                              "AIREA % of All Postings" = "pct",
-                              "AIREA Postings per 1,000 residents" = "per100k"
-                            ),
-                            selected = "airea",
-                            inline = FALSE
-                          )
+                        radioButtons(
+                          inputId = "demand_metric",
+                          label = NULL,
+                          choices = c(
+                            "Number of AIREA Job Postings" = "airea",
+                            "AIREA % of All Postings" = "pct",
+                            "AIREA Postings per 1,000 residents" = "per100k"
+                          ),
+                          selected = "airea",
+                          inline = FALSE
+                        )
                       )
                       
                     )
@@ -578,19 +594,19 @@ navbarPage(
                           "#num_socs {width: 90%;}
                           #num_socs .radio label {width: 100%;}"
                         )),
-                          radioButtons(
-                            inputId = "num_socs",
-                            label = NULL,
-                            choices = c(
-                              "5" = "5",
-                              "10" = "10",
-                              "15" = "15",
-                              "20" = "20",
-                              "All" = "all"
-                            ),
-                            selected = "15",
-                            inline = TRUE
-                          )
+                        radioButtons(
+                          inputId = "num_socs",
+                          label = NULL,
+                          choices = c(
+                            "5" = "5",
+                            "10" = "10",
+                            "15" = "15",
+                            "20" = "20",
+                            "All" = "all"
+                          ),
+                          selected = "15",
+                          inline = TRUE
+                        )
                       ),
                       
                       
@@ -609,7 +625,7 @@ navbarPage(
                           selected = "All Years",
                           width = "30%"
                         )
-                    )
+                      )
                       
                     ),
                     br()
@@ -634,9 +650,9 @@ navbarPage(
            
            
            h2("About the AIREA Data Explorer"),
-
-
-
+           
+           
+           
            fluidRow(
              column(12,
                     div(
@@ -890,5 +906,85 @@ navbarPage(
                     )
              )
            )
+  ),
+  
+  # ============================================================================
+  # Panel X: AI Chatbot
+  # ============================================================================
+  
+  tabPanel(
+    title = div("AI Chatbot"),
+    value = "chatbot",
+    
+    tags$head(
+      tags$style(HTML("
+      #chat_window {
+        background-color: #f5f7f8;
+        border-radius: 8px;
+        padding: 15px;
+        height: 500px;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+      }
+
+      .chat-bubble-user {
+        background-color: #d1e7dd !important;
+        padding: 10px 15px !important;
+        border-radius: 12px !important;
+        margin: 8px 0 !important;
+        max-width: 75% !important;
+        float: right !important;
+        clear: both !important;
+        display: block !important;
+      }
+
+      .chat-bubble-bot {
+        background-color: #ffffff !important;
+        padding: 10px 15px !important;
+        border-radius: 12px !important;
+        margin: 8px 0 !important;
+        max-width: 75% !important;
+        float: left !important;
+        clear: both !important;
+        border: 1px solid #ddd !important;
+        display: block !important;
+      }
+  "))
+    )
+    ,
+    
+    h2("AIREA AI Assistant"),
+    
+    div(
+      style="background-color:#dff3f6; padding: 15px; border-radius: 5px; margin-bottom: 15px;",
+      p(
+        "Ask questions about AIREA jobs, commuting zones, institutions, or program recommendations. ",
+        "This AI assistant uses AIREA supply–demand data (CZs + community colleges) combined with an LLM to provide data-grounded answers."
+      )
+    ),
+    
+    # Chat window
+    fluidRow(
+      column(
+        12,
+        div(id="chat_window")
+      )
+    ),
+    
+    br(),
+    
+    # Input & send button
+    fluidRow(
+      column(
+        10,
+        textInput("chat_input", label = NULL, placeholder = "Ask something about AIREA jobs or institutions...")
+      ),
+      column(
+        2,
+        actionButton("chat_send", "Send", class="btn-primary", width = "100%")
+      )
+    )
   )
+  
+  
 )
